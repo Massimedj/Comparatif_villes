@@ -26,9 +26,11 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-3.5-flash')
+            
+            # Utilisation du modèle 1.5-flash (le plus récent et rapide à ce jour)
+            model = genai.GenerativeModel('gemini-1.5-flash')
 
-            # Le "Prompt" caché mis à jour
+            # Le "Prompt" caché
             prompt = f"""
             Tu es un expert en immobilier en région parisienne.
             Fais une analyse comparative des villes suivantes : {villes_input}.
@@ -39,19 +41,19 @@ if st.button("Lancer la comparaison"):
             "Profil socio-économique", "Sécurité", "Écoles", "Infrastructures sportives", "Nature",
             "Commerces", "Transport vers Paris", "Temps vers Paris", 
             "Aspect culturel", "Ambiance", "Potentiel patrimonial".
-
-            Ne renvoie QUE le JSON brut, sans introduction, sans conclusion, et sans balises de code Markdown (```json).
             """
 
             # Affichage d'une animation de chargement
             with st.spinner("Gemini analyse le marché immobilier en cours... Cela peut prendre quelques secondes."):
-                reponse = model.generate_content(prompt)
                 
-                # Nettoyage de la réponse pour s'assurer que c'est du JSON valide
-                texte_json = reponse.text.replace('```json', '').replace('```', '').strip()
+                # L'astuce est ici : on force la configuration "application/json" pour garantir un JSON sans erreur
+                reponse = model.generate_content(
+                    prompt,
+                    generation_config={"response_mime_type": "application/json"}
+                )
                 
-                # Transformation du texte JSON en tableau de données (DataFrame)
-                donnees = json.loads(texte_json)
+                # Le nettoyage du texte n'est plus nécessaire grâce à l'option ci-dessus
+                donnees = json.loads(reponse.text)
                 df = pd.DataFrame(donnees)
                 
                 # On inverse les lignes et les colonnes pour avoir les villes en haut et les critères à gauche
