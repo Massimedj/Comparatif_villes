@@ -9,10 +9,13 @@ st.set_page_config(page_title="Comparateur de Villes Immo", page_icon="🏡", la
 st.title("🏡 Comparateur de Villes pour Achat Immobilier")
 st.write("Entrez les villes que vous souhaitez comparer, et l'IA Gemini analysera le marché pour vous.")
 
+# Récupération de la clé API cachée (dans les secrets de Streamlit)
+api_key = st.secrets["GEMINI_API_KEY"]
+
 # Champ pour entrer les villes
 villes_input = st.text_input(
     "Villes à comparer (séparées par des virgules) :", 
-    
+ 
 )
 
 # Bouton de lancement
@@ -59,7 +62,5 @@ if st.button("Lancer la comparaison"):
                 # Affichage du tableau sur l'application web
                 st.dataframe(df_transpose, use_container_width=True)
 
-        except Exception as e:
-            st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
         except Exception as e:
             st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
