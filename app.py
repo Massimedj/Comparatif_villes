@@ -28,7 +28,7 @@ if st.button("Lancer la comparaison"):
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-3.5-flash')
 
-            # Le "Prompt" caché mis à jour avec les nouveaux critères
+            # Le "Prompt" caché mis à jour
             prompt = f"""
             Tu es un expert en immobilier en région parisienne.
             Fais une analyse comparative des villes suivantes : {villes_input}.
@@ -36,7 +36,7 @@ if st.button("Lancer la comparaison"):
             Chaque objet doit représenter une ville et contenir EXACTEMENT les clés suivantes sous forme de texte synthétique :
             "Ville", "Population", "Prix maison (€/m²)", "Prix appartement (€/m²)",
             "Part maisons", "Part appartements", "Propriétaires", "Locataires",
-            "Profil socio-économique", "Sécurité", "Écoles", "Nature",
+            "Profil socio-économique", "Sécurité", "Écoles", "Infrastructures sportives", "Nature",
             "Commerces", "Transport vers Paris", "Temps vers Paris", 
             "Aspect culturel", "Ambiance", "Potentiel patrimonial".
 
