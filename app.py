@@ -30,7 +30,7 @@ if st.button("Lancer la comparaison"):
 
             # Le "Prompt" caché
             prompt = f"""
-            Tu es un expert en immobilier en région parisienne.
+            Tu es un expert en immobilier en France.
             Fais une analyse comparative des villes suivantes : {villes_input}.
             Fournis les données sous un format JSON STRICT (une liste d'objets).
             Chaque objet doit représenter une ville et contenir EXACTEMENT les clés suivantes sous forme de texte synthétique :
