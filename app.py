@@ -20,8 +20,7 @@ villes_input = st.text_input(
 
 # Bouton de lancement
 if st.button("Lancer la comparaison"):
-    if not api_key:
-        st.warning("⚠️ Veuillez entrer une clé API Gemini pour continuer.")
+
     elif not villes_input:
         st.warning("⚠️ Veuillez entrer au moins une ville.")
     else:
