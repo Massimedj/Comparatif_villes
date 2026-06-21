@@ -3,7 +3,7 @@ import google.generativeai as genai
 import pandas as pd
 import json
 
-# Configuration de la page web (layout="centered" est souvent plus élégant sur mobile)
+# Configuration de la page web
 st.set_page_config(page_title="Comparateur de Villes Immo", page_icon="🏡", layout="centered")
 
 st.title("🏡 Comparateur de Villes pour Achat Immobilier")
@@ -12,7 +12,7 @@ st.write("Entrez les villes que vous souhaitez comparer, et l'IA Gemini analyser
 # Récupération de la clé API cachée (dans les secrets de Streamlit)
 api_key = st.secrets["GEMINI_API_KEY"]
 
-# Champ pour entrer les villes (laissé vide par défaut, comme demandé)
+# Champ pour entrer les villes (laissé vide par défaut)
 villes_input = st.text_input(
     "Villes à comparer (séparées par des virgules) :", 
     ""
@@ -30,7 +30,7 @@ if st.button("Lancer la comparaison"):
 
             # Le "Prompt" caché
             prompt = f"""
-            Tu es un expert en immobilier en France.
+            Tu es un expert en immobilier en France
             Fais une analyse comparative des villes suivantes : {villes_input}.
             Fournis les données sous un format JSON STRICT (une liste d'objets).
             Chaque objet doit représenter une ville et contenir EXACTEMENT les clés suivantes sous forme de texte synthétique :
@@ -67,7 +67,7 @@ if st.button("Lancer la comparaison"):
                     with onglet:
                         ville_data = donnees[i]
                         for critere, valeur in ville_data.items():
-                            if critere != "Ville": # On n'affiche pas la clé "Ville" puisqu'elle est déjà dans le titre de l'onglet
+                            if critere != "Ville": 
                                 st.markdown(f"**{critere}** : {valeur}")
                 
                 st.markdown("---")
@@ -76,7 +76,9 @@ if st.button("Lancer la comparaison"):
                 with st.expander("📊 Voir le tableau comparatif global (Idéal sur ordinateur)"):
                     # On inverse les lignes et les colonnes pour avoir les villes en haut
                     df_transpose = df.set_index("Ville").T
-                    st.dataframe(df_transpose, use_container_width=True)
+                    
+                    # Remplacement de st.dataframe par st.table pour forcer les sauts de ligne
+                    st.table(df_transpose)
 
         except Exception as e:
             st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
