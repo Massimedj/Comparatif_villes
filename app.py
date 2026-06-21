@@ -20,14 +20,13 @@ villes_input = st.text_input(
 
 # Bouton de lancement
 if st.button("Lancer la comparaison"):
-
-    elif not villes_input:
+    if not villes_input:
         st.warning("⚠️ Veuillez entrer au moins une ville.")
     else:
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-3.5-flash')
+            model = genai.GenerativeModel('gemini-1.5-flash')
 
             # Le "Prompt" caché que l'application envoie à Gemini
             prompt = f"""
@@ -63,5 +62,7 @@ if st.button("Lancer la comparaison"):
                 # Affichage du tableau sur l'application web
                 st.dataframe(df_transpose, use_container_width=True)
 
+        except Exception as e:
+            st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
         except Exception as e:
             st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
