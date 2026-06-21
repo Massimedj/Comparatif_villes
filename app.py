@@ -9,9 +9,6 @@ st.set_page_config(page_title="Comparateur de Villes Immo", page_icon="🏡", la
 st.title("🏡 Comparateur de Villes pour Achat Immobilier")
 st.write("Entrez les villes que vous souhaitez comparer, et l'IA Gemini analysera le marché pour vous.")
 
-# Demander la clé API à l'utilisateur
-api_key = st.text_input("Votre clé API Google Gemini (obligatoire)", type="password")
-
 # Champ pour entrer les villes
 villes_input = st.text_input(
     "Villes à comparer (séparées par des virgules) :", 
@@ -26,7 +23,7 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-3.5-flash')
 
             # Le "Prompt" caché que l'application envoie à Gemini
             prompt = f"""
