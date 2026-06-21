@@ -12,10 +12,10 @@ st.write("Entrez les villes que vous souhaitez comparer, et l'IA Gemini analyser
 # Récupération de la clé API cachée (dans les secrets de Streamlit)
 api_key = st.secrets["GEMINI_API_KEY"]
 
-# Champ pour entrer les villes
+# Champ pour entrer les villes (laissé vide par défaut)
 villes_input = st.text_input(
     "Villes à comparer (séparées par des virgules) :", 
- 
+    ""
 )
 
 # Bouton de lancement
@@ -28,7 +28,7 @@ if st.button("Lancer la comparaison"):
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-3.5-flash')
 
-            # Le "Prompt" caché que l'application envoie à Gemini
+            # Le "Prompt" caché mis à jour avec les nouveaux critères
             prompt = f"""
             Tu es un expert en immobilier en région parisienne.
             Fais une analyse comparative des villes suivantes : {villes_input}.
@@ -37,8 +37,8 @@ if st.button("Lancer la comparaison"):
             "Ville", "Population", "Prix maison (€/m²)", "Prix appartement (€/m²)",
             "Part maisons", "Part appartements", "Propriétaires", "Locataires",
             "Profil socio-économique", "Sécurité", "Écoles", "Nature",
-            "Commerces", "Transport vers Paris", "Temps vers Kléber (Paris)",
-            "Ambiance", "Potentiel patrimonial".
+            "Commerces", "Transport vers Paris", "Temps vers Paris", 
+            "Aspect culturel", "Ambiance", "Potentiel patrimonial".
 
             Ne renvoie QUE le JSON brut, sans introduction, sans conclusion, et sans balises de code Markdown (```json).
             """
