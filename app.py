@@ -26,7 +26,7 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-3.5-flash')
+            model = genai.GenerativeModel('gemini-3.1-flash-lite')
 
             # Le "Prompt" caché
             prompt = f"""
@@ -34,11 +34,11 @@ if st.button("Lancer la comparaison"):
             Fais une analyse comparative des villes suivantes : {villes_input}.
             Fournis les données sous un format JSON STRICT (une liste d'objets).
             Chaque objet doit représenter une ville et contenir EXACTEMENT les clés suivantes sous forme de texte synthétique :
-            "Ville", "Population", "Prix maison (€/m²)", "Prix appartement (€/m²)",
+            "Ville", "Population", "Prix maison (€/m²)", "Prix appartement (€/m²)", ​"Évolution des prix (Tendance)" 
             "Part maisons", "Part appartements", "Propriétaires", "Locataires",
-            "Profil socio-économique", "Sécurité", "Écoles", "Infrastructures sportives", "Nature",
+            "Profil socio-économique", "Sécurité", "Qualité des écoles", "Infrastructures sportives", "Nature",
             "Commerces", "Transport vers Paris", "Temps vers Paris", 
-            "Aspect culturel", "Ambiance", "Potentiel patrimonial".
+            "Activités culturelles", "Ambiance", "Cadre de vie et Quotidien", ​"Taxe foncière", ​"Projets urbains", "Potentiel patrimonial".
             """
 
             with st.spinner("Gemini analyse le marché immobilier en cours... Cela peut prendre quelques secondes."):
