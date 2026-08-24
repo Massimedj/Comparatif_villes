@@ -220,12 +220,11 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                 df = pd.DataFrame(donnees)
                 
                 st.success("Analyse terminée !")
-                st.markdown("---")
+           
                 
+                # --- AFFICHAGE du tableau comparatif) ---
+                st.subheader("📊 Tableau comparatif")
 
-                
-                # --- AFFICHAGE POUR ORDINATEUR (Tableau global) ---
-                with st.expander("📊 Voir le tableau comparatif"):
                     if "Ville" in df.columns:
                         df_transpose = df.set_index("Ville").T
                         st.table(df_transpose)
