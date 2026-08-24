@@ -80,15 +80,15 @@ L'objectif est de permettre à un particulier ou un investisseur de comparer obj
 
 Champs numériques — chaîne de caractères ne contenant QUE des chiffres, sans unité, sans espace, sans séparateur de milliers (l'unité est déjà portée par le nom de la clé) :
 - "Population" : population municipale la plus récente connue. Ex : "42000"
-- "Prix maison (€/m²)" : prix moyen/médian estimé des maisons. Ex : "3200"
-- "Prix appartement (€/m²)" : prix moyen/médian estimé des appartements. Ex : "4100"
-- "Temps vers Paris" : temps de trajet réaliste vers Paris intra-muros en minutes, en priorité en transport en commun. Ex : "35"
+- "Prix maison (€/m²)" : prix moyen/médian estimé des maisons. Ex : "3200€"
+- "Prix appartement (€/m²)" : prix moyen/médian estimé des appartements. Ex : "4100€"
+- "Temps vers Paris" : temps de trajet réaliste vers Paris intra-muros en minutes, en priorité en transport en commun. Ex : "35 min"
 
 Champs de pourcentage — chaîne au format "XX%" :
 - "Part maisons" / "Part appartements" : doivent sommer à 100% (sauf "Non disponible")
 - "Propriétaires" / "Locataires" : doivent sommer à 100% (sauf "Non disponible")
 
-Champs notés — chaîne au format "X/5 (justification factuelle courte, 5 à 8 mots)" :
+Champs notés — chaîne au format "X/10 (justification factuelle courte, 5 à 8 mots)" :
 - "Sécurité" : niveau de sécurité et principales caractéristiques locales, sans affirmation sensationnaliste.
 - "Qualité des écoles" : offre scolaire, réputation, établissements notables, présence de privé.
 - "Infrastructures sportives" : quantité, diversité, accessibilité des équipements.
@@ -146,22 +146,22 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
   {{
     "Ville": "Versailles (78)",
     "Population": "85000",
-    "Prix maison (€/m²)": "7800",
-    "Prix appartement (€/m²)": "6900",
+    "Prix maison (€/m²)": "7800€",
+    "Prix appartement (€/m²)": "6900€",
     "Évolution des prix (Tendance)": "Stable",
     "Part maisons": "35%",
     "Part appartements": "65%",
     "Propriétaires": "58%",
     "Locataires": "42%",
     "Profil socio-économique": "CSP+ aisée, nombreuses familles avec enfants",
-    "Sécurité": "4/5 (faible délinquance, ville résidentielle)",
-    "Qualité des écoles": "5/5 (établissements réputés, options internationales)",
-    "Infrastructures sportives": "4/5 (nombreux clubs et équipements)",
-    "Nature": "4/5 (parcs, forêt à proximité)",
-    "Commerces": "4/5 (centre-ville dynamique, marchés)",
+    "Sécurité": "8/10 (faible délinquance, ville résidentielle)",
+    "Qualité des écoles": "5/10 (établissements réputés, options internationales)",
+    "Infrastructures sportives": "4/10 (nombreux clubs et équipements)",
+    "Nature": "4/10 (parcs, forêt à proximité)",
+    "Commerces": "4/10 (centre-ville dynamique, marchés)",
     "Transport vers Paris": "RER C, train, autoroute A13",
-    "Temps vers Paris": "35",
-    "Activités culturelles": "4/5 (château, musées, festivals)",
+    "Temps vers Paris": "35 min",
+    "Activités culturelles": "4/10 (château, musées, festivals)",
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
     "Taxe foncière": "Environ 1400€/an pour un bien moyen, variable selon le quartier",
@@ -192,7 +192,7 @@ Les réponses doivent être synthétiques, factuelles, comparables d'une ville �
 3. Toutes les valeurs sont des chaînes de caractères.
 4. Les champs numériques (Population, Prix maison, Prix appartement, Temps vers Paris) ne contiennent que des chiffres, sans unité ni séparateur.
 5. Les champs de pourcentage sont au format "XX%" et les paires (Part maisons/Part appartements, Propriétaires/Locataires) somment à 100% sauf "Non disponible".
-6. Les champs notés respectent le format "X/5 (justification)" ou l'échelle qualitative prévue pour le Potentiel patrimonial.
+6. Les champs notés respectent le format "X/10 (justification)" ou l'échelle qualitative prévue pour le Potentiel patrimonial.
 7. Aucune donnée n'a été inventée avec une fausse précision : "Non disponible" est utilisé quand la confiance est insuffisante.
 8. Les villes homonymes ont été désambiguïsées avec le département.
 9. Le JSON produit est syntaxiquement valide et ne contient aucun texte, balise ou commentaire en dehors du tableau JSON.
