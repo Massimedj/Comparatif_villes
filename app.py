@@ -30,7 +30,7 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-2.0-flash')
+            model = genai.GenerativeModel('gemini-3.6-flash')
 
             # Le "Prompt" caché (Intégral)
             prompt = f"""
