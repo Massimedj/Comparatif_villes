@@ -81,9 +81,9 @@ L'objectif est de permettre à un particulier ou un investisseur de comparer obj
 
 Champs numériques — chaîne de caractères ne contenant QUE des chiffres, sans unité, sans espace, sans séparateur de milliers (l'unité est déjà portée par le nom de la clé) :
 - "Population" : population municipale la plus récente connue. Ex : "42000"
-- "Prix maison (€/m²)" : prix moyen/médian estimé des maisons. Ex : "3200€"
-- "Prix appartement (€/m²)" : prix moyen/médian estimé des appartements. Ex : "4100€"
-- "Temps vers Paris" : temps de trajet réaliste vers Paris intra-muros en minutes, en priorité en transport en commun. Ex : "35 min"
+- "Prix maison (€/m²)" : prix moyen/médian estimé des maisons en euros et ajouter "€" à la fin. Ex : "3200€"
+- "Prix appartement (€/m²)" : prix moyen/médian estimé des appartements en euros et ajouter "€" à la fin. Ex : "4100€"
+- "Temps vers Paris" : temps de trajet réaliste vers Paris intra-muros en minutes et ajouter "min" à la fin, en priorité en transport en commun. Ex : "35 min"
 
 Champs de pourcentage — chaîne au format "XX%" :
 - "Part maisons" / "Part appartements" : doivent sommer à 100% (sauf "Non disponible")
