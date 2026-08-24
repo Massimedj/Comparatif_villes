@@ -51,7 +51,7 @@ Pour chaque ville, évalue simultanément :
 - les infrastructures et services ;
 - les transports et l'accessibilité à Paris ;
 - le cadre de vie ;
-- les quartiers les plus recherchés ;
+- les quartiers résidentiels les plus recherchés ;
 - les projets urbains ;
 - le potentiel patrimonial à moyen/long terme.
 
