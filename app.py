@@ -51,6 +51,7 @@ Pour chaque ville, évalue simultanément :
 - les infrastructures et services ;
 - les transports et l'accessibilité à Paris ;
 - le cadre de vie ;
+- les quartiers les plus recherchés ;
 - les projets urbains ;
 - le potentiel patrimonial à moyen/long terme.
 
@@ -103,7 +104,8 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 - "Transport vers Paris" : modes disponibles (train, RER, Transilien, métro, tram, bus, voiture, autoroute).
 - "Ambiance" : atmosphère générale (familiale, résidentielle, bourgeoise, populaire, étudiante, dynamique, calme, villageoise, urbaine), avec contrastes de quartiers si pertinent.
 - "Cadre de vie et Quotidien" : calme, densité, circulation, stationnement, praticité pour une famille ou un actif.
-- "Taxe foncière" : niveau et ordre de grandeur pour un bien type ; précise si la variabilité selon le bien est forte.
+- "Quartiers les plus recherchés" : Les deux suartiers les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
+- "Taxe foncière" : niveau et ordre de grandeur pour un bien type avec exemple de superficie; précise si la variabilité selon le bien est forte.
 - "Projets urbains" : projets crédibles, annoncés ou engagés, impactant transports, logements, commerces, équipements ou prix.
 
 ## FORMAT DE SORTIE — CONTRAINTE ABSOLUE
@@ -130,10 +132,11 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Nature": "",
     "Commerces": "",
     "Transport vers Paris": "",
-    "Temps vers Paris": "",
+    "Temps vers Paris (min)": "",
     "Activités culturelles": "",
     "Ambiance": "",
     "Cadre de vie et Quotidien": "",
+    "Quartiers les plus recherchés": "",
     "Taxe foncière": "",
     "Projets urbains": "",
     "Potentiel patrimonial": ""
@@ -164,6 +167,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "4/10 (château, musées, festivals)",
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
+    "Quartiers les plus recherchés": "Notre-Dame, Porchefontaine", 
     "Taxe foncière": "Environ 1400€/an pour un bien moyen, variable selon le quartier",
     "Projets urbains": "Rénovation de quartiers résidentiels, développement des mobilités douces",
     "Potentiel patrimonial": "Bon (marché stable et recherché, rareté du foncier)"
