@@ -222,20 +222,7 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                 st.success("Analyse terminée !")
                 st.markdown("---")
                 
-                # --- AFFICHAGE OPTIMISÉ POUR SMARTPHONE (Onglets) ---
-                st.subheader("📱 Fiches détaillées par ville")
-                
-                noms_villes = [v.get("Ville", f"Ville {i+1}") for i, v in enumerate(donnees)]
-                onglets = st.tabs(noms_villes)
-                
-                for i, onglet in enumerate(onglets):
-                    with onglet:
-                        ville_data = donnees[i]
-                        for critere, valeur in ville_data.items():
-                            if critere != "Ville": 
-                                st.markdown(f"**{critere}** : {valeur}")
-                
-                st.markdown("---")
+
                 
                 # --- AFFICHAGE POUR ORDINATEUR (Tableau global) ---
                 with st.expander("📊 Voir le tableau comparatif"):
