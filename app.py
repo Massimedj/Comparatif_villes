@@ -104,7 +104,7 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 - "Transport vers Paris" : modes disponibles (train, RER, Transilien, métro, tram, bus, voiture, autoroute).
 - "Ambiance" : atmosphère générale (familiale, résidentielle, bourgeoise, populaire, étudiante, dynamique, calme, villageoise, urbaine), avec contrastes de quartiers si pertinent.
 - "Cadre de vie et Quotidien" : calme, densité, circulation, stationnement, praticité pour une famille ou un actif.
-- "Quartiers les plus recherchés" : Les deux suartiers les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
+- "Meilleurs quartiers résidentiels" : Les deux suartiers résidentiels (maisons individuelles) les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
 - "Taxe foncière" : niveau et ordre de grandeur pour un bien type avec exemple de superficie; précise si la variabilité selon le bien est forte.
 - "Projets urbains" : projets crédibles, annoncés ou engagés, impactant transports, logements, commerces, équipements ou prix.
 
@@ -136,7 +136,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "",
     "Ambiance": "",
     "Cadre de vie et Quotidien": "",
-    "Quartiers les plus recherchés": "",
+    "Meilleurs quartiers résidentiels": "",
     "Taxe foncière": "",
     "Projets urbains": "",
     "Potentiel patrimonial": ""
@@ -167,7 +167,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "4/10 (château, musées, festivals)",
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
-    "Quartiers les plus recherchés": "Notre-Dame, Porchefontaine", 
+    "Meilleurs quartiers résidentiels": "Notre-Dame, Porchefontaine", 
     "Taxe foncière": "Environ 1400€/an pour un bien moyen, variable selon le quartier",
     "Projets urbains": "Rénovation de quartiers résidentiels, développement des mobilités douces",
     "Potentiel patrimonial": "Bon (marché stable et recherché, rareté du foncier)"
