@@ -224,8 +224,7 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                 
                 # --- AFFICHAGE du tableau comparatif) ---
                 st.subheader("📊 Tableau comparatif")
-
-                    if "Ville" in df.columns:
+                        if "Ville" in df.columns:
                         df_transpose = df.set_index("Ville").T
                         st.table(df_transpose)
                     else:
