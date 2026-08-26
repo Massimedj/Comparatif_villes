@@ -1,7 +1,15 @@
+import io
 import json
 import pandas as pd
 import streamlit as st
 import google.generativeai as genai
+
+from openpyxl.styles import Font, PatternFill
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib import colors
+from reportlab.lib.units import cm
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 # Configuration de la page web
 st.set_page_config(page_title="Comparateur de Villes Immo", page_icon="🏡", layout="centered")
@@ -16,9 +24,87 @@ if "GEMINI_API_KEY" not in st.secrets:
 
 api_key = st.secrets["GEMINI_API_KEY"]
 
+
+# --- FONCTIONS D'EXPORT ---
+
+def generer_excel(df):
+    """Génère un fichier Excel (bytes) à partir du tableau comparatif."""
+    df_export = df.set_index("Ville").T if "Ville" in df.columns else df
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        df_export.to_excel(writer, sheet_name="Comparaison villes")
+        feuille = writer.sheets["Comparaison villes"]
+
+        # Mise en forme de l'en-tête (villes)
+        for cellule in feuille[1]:
+            cellule.font = Font(bold=True, color="FFFFFF")
+            cellule.fill = PatternFill(start_color="FF4B4B", end_color="FF4B4B", fill_type="solid")
+
+        # Largeur des colonnes ajustée au contenu
+        for colonne in feuille.columns:
+            longueur_max = max((len(str(c.value)) for c in colonne if c.value is not None), default=10)
+            lettre_colonne = colonne[0].column_letter
+            feuille.column_dimensions[lettre_colonne].width = min(longueur_max + 2, 50)
+
+        feuille.freeze_panes = "B2"
+
+    return buffer.getvalue()
+
+
+def generer_pdf(df):
+    """Génère un fichier PDF (bytes) à partir du tableau comparatif."""
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        leftMargin=1 * cm, rightMargin=1 * cm,
+        topMargin=1 * cm, bottomMargin=1 * cm
+    )
+
+    styles = getSampleStyleSheet()
+    cell_style = ParagraphStyle("cell", parent=styles["Normal"], fontSize=7, leading=9)
+    header_style = ParagraphStyle(
+        "header", parent=styles["Normal"], fontSize=8, leading=10,
+        textColor=colors.white, fontName="Helvetica-Bold"
+    )
+
+    elements = [
+        Paragraph("Comparateur de Villes - Résultat de l'analyse", styles["Title"]),
+        Spacer(1, 0.5 * cm)
+    ]
+
+    df_export = df.set_index("Ville").T if "Ville" in df.columns else df
+
+    # Construction du tableau avec retour à la ligne automatique dans les cellules
+    data = [[Paragraph("Critère", header_style)] + [Paragraph(str(v), header_style) for v in df_export.columns]]
+    for critere, ligne in df_export.iterrows():
+        row = [Paragraph(str(critere), cell_style)]
+        for valeur in ligne:
+            row.append(Paragraph(str(valeur), cell_style))
+        data.append(row)
+
+    nb_colonnes = len(df_export.columns) + 1
+    largeur_disponible = landscape(A4)[0] - 2 * cm
+    largeur_premiere_colonne = 4 * cm
+    largeur_autres = (largeur_disponible - largeur_premiere_colonne) / max(nb_colonnes - 1, 1)
+    col_widths = [largeur_premiere_colonne] + [largeur_autres] * (nb_colonnes - 1)
+
+    table = Table(data, colWidths=col_widths, repeatRows=1)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#FF4B4B")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F5F5F5")]),
+    ]))
+
+    elements.append(table)
+    doc.build(elements)
+    return buffer.getvalue()
+
+
 # Champ pour entrer les villes
 villes_input = st.text_input(
-    "Villes à comparer (séparées par des virgules) :", 
+    "Villes à comparer (séparées par des virgules) :",
     ""
 )
 
@@ -209,7 +295,7 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                     prompt,
                     generation_config={"response_mime_type": "application/json"}
                 )
-                
+
                 # Parsing sécurisé du JSON
                 try:
                     donnees = json.loads(reponse.text)
@@ -217,19 +303,44 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                     st.error("❌ Erreur dans le format retourné par l'IA. Veuillez relancer la comparaison.")
                     st.stop()
 
-                df = pd.DataFrame(donnees)
-                
-                st.success("Analyse terminée !")
-           
-                
-                # --- AFFICHAGE du tableau comparatif) ---
-
-                st.subheader("📊 Résultat de l'analyse :")
-                if "Ville" in df.columns:
-                    df_transpose = df.set_index("Ville").T
-                    st.table(df_transpose)
-                else:
-                    st.dataframe(df)
+                # On mémorise le résultat pour qu'il reste affiché même après un clic
+                # sur les boutons d'export (sans quoi Streamlit relance le script
+                # et le tableau disparaîtrait).
+                st.session_state["df_resultats"] = pd.DataFrame(donnees)
 
         except Exception as e:
             st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
+
+# --- AFFICHAGE du tableau comparatif et export ---
+if "df_resultats" in st.session_state:
+    df = st.session_state["df_resultats"]
+
+    st.success("Analyse terminée !")
+    st.subheader("📊 Résultat de l'analyse :")
+    if "Ville" in df.columns:
+        df_transpose = df.set_index("Ville").T
+        st.table(df_transpose)
+    else:
+        st.dataframe(df)
+
+    st.subheader("💾 Exporter les résultats")
+    format_export = st.radio(
+        "Choisissez le format d'export :",
+        ["Excel", "PDF"],
+        horizontal=True
+    )
+
+    if format_export == "Excel":
+        st.download_button(
+            label="📥 Télécharger en Excel",
+            data=generer_excel(df),
+            file_name="comparaison_villes.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    else:
+        st.download_button(
+            label="📥 Télécharger en PDF",
+            data=generer_pdf(df),
+            file_name="comparaison_villes.pdf",
+            mime="application/pdf"
+        )
