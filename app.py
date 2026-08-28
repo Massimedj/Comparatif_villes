@@ -116,7 +116,7 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            
+            # Utilisation du modèle Gemini 1.5 Flash (nom valide)
             model = genai.GenerativeModel('gemini-3.6-flash')
 
             # Le "Prompt" caché (Intégral)
@@ -193,7 +193,7 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 - "Ambiance" : atmosphère générale (familiale, résidentielle, bourgeoise, populaire, étudiante, dynamique, calme, villageoise, urbaine), avec contrastes de quartiers si pertinent.
 - "Cadre de vie et Quotidien" : calme, densité, circulation, stationnement, praticité pour une famille ou un actif.
 - "Quartiers principaux" : liste des noms des 3 à 5 quartiers les plus importants de la ville, séparés par des virgules. Ex : "Centre-ville, Notre-Dame, Porchefontaine"
-- "Informations quartiers" : Détaille des quartiers de la ville. Pour chaque quartier, précise : **caractéristiques** (type d'habitat, ambiance, commodités), **catégorie sociale dominante**, **niveau de sécurité**, **écoles de rattachement** (noms ou types), et **transports disponibles** (modes et accessibilité). Utilise un format structuré avec des points-virgules ou des tirets. Exemple : "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale mixte, jeunes actifs ; sécurité correcte ; écoles : Lycée X, Collège Y ; transports : bus, gare à 10 min." Si un aspect est inconnu, écris "Non disponible".
+- "Quartiers" : liste d'objets JSON. Chaque objet doit contenir exactement les clés "Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports". Toutes les valeurs sont des chaînes de caractères. Si un aspect est inconnu, écris "Non disponible". Exemple : [{{"Nom": "Centre-ville", "Caractéristiques": "Appartements anciens", "Catégorie sociale": "Mixte", "Sécurité": "Correcte", "Écoles": "Lycée X", "Transports": "Bus"}}]
 - "Meilleurs quartiers résidentiels" : Les deux quartiers résidentiels (maisons individuelles) les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
 - "Taxe foncière" : niveau et ordre de grandeur pour un bien type avec exemple de superficie; précise si la variabilité selon le bien est forte.
 - "Projets urbains" : projets crédibles, annoncés ou engagés, impactant transports, logements, commerces, équipements ou prix.
@@ -202,7 +202,7 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 
 Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown (pas de ```json), sans commentaire.
 
-La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEMENT les clés suivantes, dans cet ordre, avec des valeurs qui sont TOUTES des chaînes de caractères :
+La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEMENT les clés suivantes, dans cet ordre, avec des valeurs qui sont TOUTES des chaînes de caractères, SAUF pour la clé "Quartiers" qui doit être une liste d'objets comme défini ci-dessus :
 
 [
   {{
@@ -227,7 +227,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Ambiance": "",
     "Cadre de vie et Quotidien": "",
     "Quartiers principaux": "",
-    "Informations quartiers": "",
+    "Quartiers": [],
     "Meilleurs quartiers résidentiels": "",
     "Taxe foncière": "",
     "Projets urbains": "",
@@ -260,7 +260,32 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
     "Quartiers principaux": "Centre-ville, Notre-Dame, Porchefontaine",
-    "Informations quartiers": "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale aisée ; sécurité élevée ; écoles : Lycée Hoche, Collège Rameau ; transports : gare Rive Droite, bus. Quartier Notre-Dame : maisons bourgeoises, calme ; familles CSP+ ; sécurité élevée ; écoles : école privée Saint-Jean, collège ; transports : gare Rive Gauche. Quartier Porchefontaine : résidentiel, verdoyant ; classes moyennes supérieures ; sécurité bonne ; écoles : groupe scolaire public ; transports : bus, accès A13.",
+    "Quartiers": [
+      {{
+        "Nom": "Centre-ville",
+        "Caractéristiques": "Appartements anciens, ambiance animée",
+        "Catégorie sociale": "Aisée",
+        "Sécurité": "Élevée",
+        "Écoles": "Lycée Hoche, Collège Rameau",
+        "Transports": "Gare Rive Droite, bus"
+      }},
+      {{
+        "Nom": "Notre-Dame",
+        "Caractéristiques": "Maisons bourgeoises, calme",
+        "Catégorie sociale": "Familles CSP+",
+        "Sécurité": "Élevée",
+        "Écoles": "École privée Saint-Jean, collège",
+        "Transports": "Gare Rive Gauche"
+      }},
+      {{
+        "Nom": "Porchefontaine",
+        "Caractéristiques": "Résidentiel, verdoyant",
+        "Catégorie sociale": "Classes moyennes supérieures",
+        "Sécurité": "Bonne",
+        "Écoles": "Groupe scolaire public",
+        "Transports": "Bus, accès A13"
+      }}
+    ],
     "Meilleurs quartiers résidentiels": "Notre-Dame, Porchefontaine", 
     "Taxe foncière": "Environ 1400€/an pour un bien moyen, variable selon le quartier",
     "Projets urbains": "Rénovation de quartiers résidentiels, développement des mobilités douces",
@@ -273,7 +298,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
 - Retourne uniquement du JSON, aucun texte hors JSON, aucun bloc ```json, aucun commentaire.
 - Aucune clé supplémentaire, aucune clé manquante.
 - Respecte exactement l'orthographe et les accents des clés.
-- Toutes les valeurs sont des chaînes de caractères, y compris les nombres.
+- Toutes les valeurs sont des chaînes de caractères, sauf "Quartiers" qui est une liste d'objets avec des valeurs chaînes.
 - Échappe correctement les guillemets et caractères spéciaux nécessaires au JSON.
 - Le nombre d'objets doit être exactement égal au nombre de villes fournies dans {villes_input}.
 - Respecte exactement l'ordre des villes fourni dans {villes_input}.
@@ -287,7 +312,7 @@ Les réponses doivent être synthétiques, factuelles, comparables d'une ville �
 
 1. Toutes les villes de {villes_input} sont présentes, dans le même ordre, sans ajout ni omission.
 2. Chaque objet possède exactement les 25 clés demandées, dans le même ordre, sans clé en trop ni manquante.
-3. Toutes les valeurs sont des chaînes de caractères.
+3. Toutes les valeurs sont des chaînes de caractères, sauf "Quartiers" qui doit être une liste d'objets.
 4. Les champs numériques (Population, Prix maison, Prix appartement, Temps vers Paris) ne contiennent que des chiffres, sans unité ni séparateur.
 5. Les champs de pourcentage sont au format "XX%" et les paires (Part maisons/Part appartements, Propriétaires/Locataires) somment à 100% sauf "Non disponible".
 6. Les champs notés respectent le format "X/10 (justification)" ou l'échelle qualitative prévue pour le Potentiel patrimonial.
@@ -327,28 +352,44 @@ if "df_resultats" in st.session_state:
     st.subheader("📊 Résultat de l'analyse :")
 
     # Vérifier que les colonnes nécessaires existent
-    if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Informations quartiers" in df.columns:
-        # Copie pour l'affichage principal : on retire la colonne détaillée
-        df_affichage = df.drop(columns=["Informations quartiers"])
+    if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Quartiers" in df.columns:
+        # Colonne à exclure du tableau principal car elle contient une liste
+        colonne_a_exclure = ["Quartiers"]
 
-        # Transposition pour un tableau lisible (villes en colonnes)
+        # Tableau principal sans la colonne détaillée
+        df_affichage = df.drop(columns=colonne_a_exclure)
         df_transpose = df_affichage.set_index("Ville").T
         st.table(df_transpose)
 
-        # Section détaillée des quartiers, masquée par défaut
-        st.subheader("🔍 Détail des quartiers")
-        st.write("Cliquez sur une ville pour afficher les informations détaillées de ses quartiers.")
+        # Section pour les tableaux de quartiers
+        st.subheader("🔍 Détail des quartiers (tableau comparatif)")
+        st.write("Cliquez sur une ville pour voir le tableau détaillé de ses quartiers.")
 
         for _, row in df.iterrows():
             ville = row["Ville"]
-            details = row.get("Informations quartiers", "Non disponible")
-            with st.expander(f"Informations quartiers - {ville}"):
-                st.write(details)
+            quartiers_data = row.get("Quartiers", None)
+
+            # Si la valeur est une liste (après parsing JSON)
+            if isinstance(quartiers_data, list):
+                df_quartiers = pd.DataFrame(quartiers_data)
+                with st.expander(f"Quartiers - {ville}"):
+                    if not df_quartiers.empty:
+                        # On réorganise les colonnes si nécessaire
+                        colonnes_ordre = ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"]
+                        colonnes_presentes = [c for c in colonnes_ordre if c in df_quartiers.columns]
+                        df_quartiers = df_quartiers[colonnes_presentes]
+                        st.dataframe(df_quartiers, use_container_width=True)
+                    else:
+                        st.write("Aucun détail de quartier disponible.")
+            else:
+                # Fallback si l'IA n'a pas renvoyé une liste
+                with st.expander(f"Quartiers - {ville}"):
+                    st.write(quartiers_data if quartiers_data else "Non disponible")
     else:
-        # Fallback si le nouveau format n'est pas présent
+        # Fallback si les colonnes ne sont pas présentes (ancien format)
         st.dataframe(df)
 
-    # Export (conserve toutes les colonnes, y compris les détails)
+    # Export (on exclut la colonne "Quartiers" car elle contient des listes)
     st.subheader("💾 Exporter les résultats")
     format_export = st.radio(
         "Choisissez le format d'export :",
@@ -356,17 +397,23 @@ if "df_resultats" in st.session_state:
         horizontal=True
     )
 
+    # Utiliser df_affichage (sans la colonne "Quartiers") pour l'export
+    if "df_affichage" in locals():
+        df_export = df_affichage
+    else:
+        df_export = df  # fallback si les colonnes spéciales ne sont pas présentes
+
     if format_export == "Excel":
         st.download_button(
             label="📥 Télécharger en Excel",
-            data=generer_excel(df),
+            data=generer_excel(df_export),
             file_name="comparaison_villes.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     else:
         st.download_button(
             label="📥 Télécharger en PDF",
-            data=generer_pdf(df),
+            data=generer_pdf(df_export),
             file_name="comparaison_villes.pdf",
             mime="application/pdf"
         )
