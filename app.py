@@ -116,9 +116,10 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
+            
             model = genai.GenerativeModel('gemini-3.6-flash')
 
-            # Le "Prompt" caché (Intégral) - modifié pour inclure les quartiers
+            # Le "Prompt" caché (Intégral)
             prompt = f"""
 Tu es un expert senior de l'immobilier résidentiel en France, spécialisé dans l'analyse des marchés locaux, de l'attractivité territoriale, du cadre de vie et du potentiel patrimonial.
 
@@ -137,7 +138,7 @@ Pour chaque ville, évalue simultanément :
 - les infrastructures et services ;
 - les transports et l'accessibilité à Paris ;
 - le cadre de vie ;
-- **les quartiers (caractéristiques, catégorie sociale, sécurité, écoles de rattachement, transports)** ;  # NOUVEAU
+- les quartiers (caractéristiques, catégorie sociale, sécurité, écoles de rattachement, transports) ;
 - les quartiers résidentiels les plus recherchés ;
 - les projets urbains ;
 - le potentiel patrimonial à moyen/long terme.
@@ -191,7 +192,8 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 - "Transport vers Paris" : modes disponibles (train, RER, Transilien, métro, tram, bus, voiture, autoroute).
 - "Ambiance" : atmosphère générale (familiale, résidentielle, bourgeoise, populaire, étudiante, dynamique, calme, villageoise, urbaine), avec contrastes de quartiers si pertinent.
 - "Cadre de vie et Quotidien" : calme, densité, circulation, stationnement, praticité pour une famille ou un actif.
-- **"Informations quartiers"** : Détaille les principaux quartiers (3 à 5 selon la taille de la ville). Pour chaque quartier, précise : **caractéristiques** (type d'habitat, ambiance, commodités), **catégorie sociale dominante**, **niveau de sécurité**, **écoles de rattachement** (noms ou types), et **transports disponibles** (modes et accessibilité). Utilise un format structuré avec des points-virgules ou des tirets. Exemple : "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale mixte, jeunes actifs ; sécurité correcte ; écoles : Lycée X, Collège Y ; transports : bus, gare à 10 min." Si un aspect est inconnu, écris "Non disponible".  # NOUVEAU
+- "Quartiers principaux" : liste des noms des 3 à 5 quartiers les plus importants de la ville, séparés par des virgules. Ex : "Centre-ville, Notre-Dame, Porchefontaine"
+- "Informations quartiers" : Détaille des quartiers de la ville. Pour chaque quartier, précise : **caractéristiques** (type d'habitat, ambiance, commodités), **catégorie sociale dominante**, **niveau de sécurité**, **écoles de rattachement** (noms ou types), et **transports disponibles** (modes et accessibilité). Utilise un format structuré avec des points-virgules ou des tirets. Exemple : "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale mixte, jeunes actifs ; sécurité correcte ; écoles : Lycée X, Collège Y ; transports : bus, gare à 10 min." Si un aspect est inconnu, écris "Non disponible".
 - "Meilleurs quartiers résidentiels" : Les deux quartiers résidentiels (maisons individuelles) les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
 - "Taxe foncière" : niveau et ordre de grandeur pour un bien type avec exemple de superficie; précise si la variabilité selon le bien est forte.
 - "Projets urbains" : projets crédibles, annoncés ou engagés, impactant transports, logements, commerces, équipements ou prix.
@@ -224,7 +226,8 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "",
     "Ambiance": "",
     "Cadre de vie et Quotidien": "",
-    "Informations quartiers": "",   # NOUVEAU : ajouté avant "Meilleurs quartiers résidentiels"
+    "Quartiers principaux": "",
+    "Informations quartiers": "",
     "Meilleurs quartiers résidentiels": "",
     "Taxe foncière": "",
     "Projets urbains": "",
@@ -256,6 +259,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "4/10 (château, musées, festivals)",
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
+    "Quartiers principaux": "Centre-ville, Notre-Dame, Porchefontaine",
     "Informations quartiers": "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale aisée ; sécurité élevée ; écoles : Lycée Hoche, Collège Rameau ; transports : gare Rive Droite, bus. Quartier Notre-Dame : maisons bourgeoises, calme ; familles CSP+ ; sécurité élevée ; écoles : école privée Saint-Jean, collège ; transports : gare Rive Gauche. Quartier Porchefontaine : résidentiel, verdoyant ; classes moyennes supérieures ; sécurité bonne ; écoles : groupe scolaire public ; transports : bus, accès A13.",
     "Meilleurs quartiers résidentiels": "Notre-Dame, Porchefontaine", 
     "Taxe foncière": "Environ 1400€/an pour un bien moyen, variable selon le quartier",
@@ -282,7 +286,7 @@ Les réponses doivent être synthétiques, factuelles, comparables d'une ville �
 ## CONTRÔLE DE COHÉRENCE (à effectuer silencieusement avant de répondre)
 
 1. Toutes les villes de {villes_input} sont présentes, dans le même ordre, sans ajout ni omission.
-2. Chaque objet possède exactement les **24** clés demandées, dans le même ordre, sans clé en trop ni manquante.  # MODIFIÉ (23 → 24)
+2. Chaque objet possède exactement les 25 clés demandées, dans le même ordre, sans clé en trop ni manquante.
 3. Toutes les valeurs sont des chaînes de caractères.
 4. Les champs numériques (Population, Prix maison, Prix appartement, Temps vers Paris) ne contiennent que des chiffres, sans unité ni séparateur.
 5. Les champs de pourcentage sont au format "XX%" et les paires (Part maisons/Part appartements, Propriétaires/Locataires) somment à 100% sauf "Non disponible".
@@ -321,12 +325,30 @@ if "df_resultats" in st.session_state:
 
     st.success("Analyse terminée !")
     st.subheader("📊 Résultat de l'analyse :")
-    if "Ville" in df.columns:
-        df_transpose = df.set_index("Ville").T
+
+    # Vérifier que les colonnes nécessaires existent
+    if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Informations quartiers" in df.columns:
+        # Copie pour l'affichage principal : on retire la colonne détaillée
+        df_affichage = df.drop(columns=["Informations quartiers"])
+
+        # Transposition pour un tableau lisible (villes en colonnes)
+        df_transpose = df_affichage.set_index("Ville").T
         st.table(df_transpose)
+
+        # Section détaillée des quartiers, masquée par défaut
+        st.subheader("🔍 Détail des quartiers")
+        st.write("Cliquez sur une ville pour afficher les informations détaillées de ses quartiers.")
+
+        for _, row in df.iterrows():
+            ville = row["Ville"]
+            details = row.get("Informations quartiers", "Non disponible")
+            with st.expander(f"Informations quartiers - {ville}"):
+                st.write(details)
     else:
+        # Fallback si le nouveau format n'est pas présent
         st.dataframe(df)
 
+    # Export (conserve toutes les colonnes, y compris les détails)
     st.subheader("💾 Exporter les résultats")
     format_export = st.radio(
         "Choisissez le format d'export :",
