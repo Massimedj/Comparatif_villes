@@ -326,42 +326,29 @@ if "df_resultats" in st.session_state:
     st.success("Analyse terminée !")
     st.subheader("📊 Résultat de l'analyse :")
 
-    # Colonnes à exclure du tableau principal (car elles contiennent des structures complexes)
-    colonnes_a_exclure = ["Quartiers"]  # on garde "Quartiers principaux" dans le tableau
-
     # Vérifier que les colonnes nécessaires existent
-    if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Quartiers" in df.columns:
-        # Tableau principal sans la colonne détaillée
-        df_affichage = df.drop(columns=colonnes_a_exclure)
+    if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Informations quartiers" in df.columns:
+        # Copie pour l'affichage principal : on retire la colonne détaillée
+        df_affichage = df.drop(columns=["Informations quartiers"])
+
+        # Transposition pour un tableau lisible (villes en colonnes)
         df_transpose = df_affichage.set_index("Ville").T
         st.table(df_transpose)
 
-        # Section pour les tableaux de quartiers
-        st.subheader("🔍 Détail des quartiers (tableau comparatif)")
-        st.write("Cliquez sur une ville pour voir le tableau détaillé de ses quartiers.")
+        # Section détaillée des quartiers, masquée par défaut
+        st.subheader("🔍 Détail des quartiers")
+        st.write("Cliquez sur une ville pour afficher les informations détaillées de ses quartiers.")
 
         for _, row in df.iterrows():
             ville = row["Ville"]
-            quartiers_data = row.get("Quartiers", None)
-
-            # Si la valeur est une liste (après parsing JSON), on crée un DataFrame
-            if isinstance(quartiers_data, list):
-                df_quartiers = pd.DataFrame(quartiers_data)
-                # Si le DataFrame n'est pas vide, on l'affiche dans un expander
-                with st.expander(f"Quartiers - {ville}"):
-                    if not df_quartiers.empty:
-                        st.dataframe(df_quartiers, use_container_width=True)
-                    else:
-                        st.write("Aucun détail de quartier disponible.")
-            else:
-                # Fallback si l'IA n'a pas renvoyé une liste (ex: chaîne de caractères)
-                with st.expander(f"Quartiers - {ville}"):
-                    st.write(quartiers_data if quartiers_data else "Non disponible")
+            details = row.get("Informations quartiers", "Non disponible")
+            with st.expander(f"Informations quartiers - {ville}"):
+                st.write(details)
     else:
-        # Fallback si les colonnes ne sont pas présentes (ancien format)
+        # Fallback si le nouveau format n'est pas présent
         st.dataframe(df)
 
-    # Export (inchangé)
+    # Export (conserve toutes les colonnes, y compris les détails)
     st.subheader("💾 Exporter les résultats")
     format_export = st.radio(
         "Choisissez le format d'export :",
