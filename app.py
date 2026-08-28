@@ -192,7 +192,7 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 - "Transport vers Paris" : modes disponibles (train, RER, Transilien, métro, tram, bus, voiture, autoroute).
 - "Ambiance" : atmosphère générale (familiale, résidentielle, bourgeoise, populaire, étudiante, dynamique, calme, villageoise, urbaine), avec contrastes de quartiers si pertinent.
 - "Cadre de vie et Quotidien" : calme, densité, circulation, stationnement, praticité pour une famille ou un actif.
-- "Quartiers principaux" : liste des noms des quartiers les plus importants ou connus de la ville, séparés par des virgules. Cette liste peut ne pas être exhaustive mais doit servir de résumé. Ex : "Centre-ville, Notre-Dame, Porchefontaine"
+- "Quartiers de la ville" : liste des noms des quartiers les plus importants ou connus de la ville, séparés par des virgules. Cette liste peut ne pas être exhaustive mais doit servir de résumé. Ex : "Centre-ville, Notre-Dame, Porchefontaine"
 - "Quartiers" : liste d'objets JSON représentant **tous les quartiers** de la ville (ou la quasi-totalité si la ville est très étendue, dans ce cas regrouper les micro-quartiers en zones cohérentes, mais vise l'exhaustivité). Chaque objet doit contenir exactement les clés "Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports". Toutes les valeurs sont des chaînes de caractères. Si un aspect est inconnu, écris "Non disponible". Exemple : [{{"Nom": "Centre-ville", "Caractéristiques": "Appartements anciens", "Catégorie sociale": "Mixte", "Sécurité": "Correcte", "Écoles": "Lycée X", "Transports": "Bus"}}]
 - "Meilleurs quartiers résidentiels" : Les deux quartiers résidentiels (maisons individuelles) les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
 - "Taxe foncière" : niveau et ordre de grandeur pour un bien type avec exemple de superficie; précise si la variabilité selon le bien est forte.
@@ -226,7 +226,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "",
     "Ambiance": "",
     "Cadre de vie et Quotidien": "",
-    "Quartiers principaux": "",
+    "Quartiers de la ville": "",
     "Quartiers": [],
     "Meilleurs quartiers résidentiels": "",
     "Taxe foncière": "",
@@ -259,7 +259,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "4/10 (château, musées, festivals)",
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
-    "Quartiers principaux": "Centre-ville, Notre-Dame, Porchefontaine, Montreuil, Satory",
+    "Quartiers de la ville": "Centre-ville, Notre-Dame, Porchefontaine, Montreuil, Satory",
     "Quartiers": [
       {{
         "Nom": "Centre-ville",
@@ -368,7 +368,7 @@ if "df_resultats" in st.session_state:
     st.subheader("📊 Résultat de l'analyse :")
 
     # Vérifier que les colonnes nécessaires existent
-    if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Quartiers" in df.columns:
+    if "Ville" in df.columns and "Quartiers de la ville" in df.columns and "Quartiers" in df.columns:
         # Colonne à exclure du tableau principal car elle contient une liste
         colonne_a_exclure = ["Quartiers"]
 
