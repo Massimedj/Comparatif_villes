@@ -116,9 +116,10 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-3.6-flash')
+            # Correction du nom du modèle (l'original "gemini-3.6-flash" n'existe pas)
+            model = genai.GenerativeModel('gemini-1.5-flash')
 
-            # Le "Prompt" caché (Intégral)
+            # Le "Prompt" caché (Intégral) - modifié pour inclure les quartiers
             prompt = f"""
 Tu es un expert senior de l'immobilier résidentiel en France, spécialisé dans l'analyse des marchés locaux, de l'attractivité territoriale, du cadre de vie et du potentiel patrimonial.
 
@@ -137,6 +138,7 @@ Pour chaque ville, évalue simultanément :
 - les infrastructures et services ;
 - les transports et l'accessibilité à Paris ;
 - le cadre de vie ;
+- **les quartiers (caractéristiques, catégorie sociale, sécurité, écoles de rattachement, transports)** ;  # NOUVEAU
 - les quartiers résidentiels les plus recherchés ;
 - les projets urbains ;
 - le potentiel patrimonial à moyen/long terme.
@@ -190,7 +192,8 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 - "Transport vers Paris" : modes disponibles (train, RER, Transilien, métro, tram, bus, voiture, autoroute).
 - "Ambiance" : atmosphère générale (familiale, résidentielle, bourgeoise, populaire, étudiante, dynamique, calme, villageoise, urbaine), avec contrastes de quartiers si pertinent.
 - "Cadre de vie et Quotidien" : calme, densité, circulation, stationnement, praticité pour une famille ou un actif.
-- "Meilleurs quartiers résidentiels" : Les deux suartiers résidentiels (maisons individuelles) les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
+- **"Informations quartiers"** : Détaille les principaux quartiers (3 à 5 selon la taille de la ville). Pour chaque quartier, précise : **caractéristiques** (type d'habitat, ambiance, commodités), **catégorie sociale dominante**, **niveau de sécurité**, **écoles de rattachement** (noms ou types), et **transports disponibles** (modes et accessibilité). Utilise un format structuré avec des points-virgules ou des tirets. Exemple : "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale mixte, jeunes actifs ; sécurité correcte ; écoles : Lycée X, Collège Y ; transports : bus, gare à 10 min." Si un aspect est inconnu, écris "Non disponible".  # NOUVEAU
+- "Meilleurs quartiers résidentiels" : Les deux quartiers résidentiels (maisons individuelles) les plus recherchés et prisés qui ont les meilleures notes de tous les points ci-dessus.
 - "Taxe foncière" : niveau et ordre de grandeur pour un bien type avec exemple de superficie; précise si la variabilité selon le bien est forte.
 - "Projets urbains" : projets crédibles, annoncés ou engagés, impactant transports, logements, commerces, équipements ou prix.
 
@@ -222,6 +225,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "",
     "Ambiance": "",
     "Cadre de vie et Quotidien": "",
+    "Informations quartiers": "",   # NOUVEAU : ajouté avant "Meilleurs quartiers résidentiels"
     "Meilleurs quartiers résidentiels": "",
     "Taxe foncière": "",
     "Projets urbains": "",
@@ -253,6 +257,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Activités culturelles": "4/10 (château, musées, festivals)",
     "Ambiance": "Chic, calme, patrimoniale",
     "Cadre de vie et Quotidien": "Ville verte et sécurisée, forte vie associative",
+    "Informations quartiers": "Centre-ville : appartements anciens, ambiance animée ; catégorie sociale aisée ; sécurité élevée ; écoles : Lycée Hoche, Collège Rameau ; transports : gare Rive Droite, bus. Quartier Notre-Dame : maisons bourgeoises, calme ; familles CSP+ ; sécurité élevée ; écoles : école privée Saint-Jean, collège ; transports : gare Rive Gauche. Quartier Porchefontaine : résidentiel, verdoyant ; classes moyennes supérieures ; sécurité bonne ; écoles : groupe scolaire public ; transports : bus, accès A13.",
     "Meilleurs quartiers résidentiels": "Notre-Dame, Porchefontaine", 
     "Taxe foncière": "Environ 1400€/an pour un bien moyen, variable selon le quartier",
     "Projets urbains": "Rénovation de quartiers résidentiels, développement des mobilités douces",
@@ -278,7 +283,7 @@ Les réponses doivent être synthétiques, factuelles, comparables d'une ville �
 ## CONTRÔLE DE COHÉRENCE (à effectuer silencieusement avant de répondre)
 
 1. Toutes les villes de {villes_input} sont présentes, dans le même ordre, sans ajout ni omission.
-2. Chaque objet possède exactement les 23 clés demandées, dans le même ordre, sans clé en trop ni manquante.
+2. Chaque objet possède exactement les **24** clés demandées, dans le même ordre, sans clé en trop ni manquante.  # MODIFIÉ (23 → 24)
 3. Toutes les valeurs sont des chaînes de caractères.
 4. Les champs numériques (Population, Prix maison, Prix appartement, Temps vers Paris) ne contiennent que des chiffres, sans unité ni séparateur.
 5. Les champs de pourcentage sont au format "XX%" et les paires (Part maisons/Part appartements, Propriétaires/Locataires) somment à 100% sauf "Non disponible".
