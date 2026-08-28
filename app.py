@@ -116,8 +116,7 @@ if st.button("Lancer la comparaison"):
         try:
             # Connexion à Gemini
             genai.configure(api_key=api_key)
-            # Correction du nom du modèle (l'original "gemini-3.6-flash" n'existe pas)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-3.6-flash')
 
             # Le "Prompt" caché (Intégral) - modifié pour inclure les quartiers
             prompt = f"""
