@@ -496,13 +496,21 @@ with tab3:
         else:
             try:
                 prompt_ecoles = f"""
-Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante : {ville_ecoles}, tu dois établir la liste **exhaustive** des établissements scolaires, en distinguant clairement les **écoles publiques** et les **écoles privées sous contrat** (et hors contrat si pertinent).
+Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante : {ville_ecoles}, tu dois établir la liste **exhaustive** des établissements scolaires (publics et privés sous contrat), en utilisant les données officielles les plus récentes.
 
-Pour ce faire, tu t'appuies sur les **données officielles** disponibles en ligne : sites du Ministère de l'Éducation nationale, annuaires des académies, portails des mairies, listes des établissements publics et privés, etc. Tu croises ces sources pour obtenir une liste fiable et à jour.
+## MÉTHODOLOGIE OBLIGATOIRE
 
-Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown, sans commentaire.
+1. **Sectorisation** : consulte la carte scolaire officielle (sites des académies, mairies, ou données du Ministère) pour associer chaque école aux **quartiers de rattachement** exacts.
+2. **IPS** : récupère l’Indice de Position Sociale publié par l’Éducation nationale (généralement disponible sur data.education.gouv.fr). Si absent, écris "Non disponible".
+3. **Taux d'absence des professeurs** : cette donnée est rarement publique ; si tu ne la trouves pas, écris "Non disponible".
+4. **Qualité de l'infrastructure** : base-toi sur des descriptions factuelles (état des bâtiments, équipements). Si tu n'as pas de source fiable, écris "Non disponible".
+5. **Croisement** : pour chaque école, liste les quartiers (tels que définis dans une analyse urbaine classique) qui en dépendent selon la carte scolaire.
 
-La sortie doit être une liste JSON d'objets, chaque objet représentant une école. Chaque objet doit contenir EXACTEMENT les clés suivantes, dans cet ordre, avec des valeurs qui sont TOUTES des chaînes de caractères :
+## FORMAT DE SORTIE
+
+Retourne EXCLUSIVEMENT un JSON valide, sans texte hors JSON, sans balises markdown.
+
+La sortie doit être une liste d'objets, chaque objet représentant une école. Chaque objet doit contenir EXACTEMENT les clés suivantes (toutes valeurs en chaînes de caractères) :
 
 [
   {{
@@ -518,24 +526,23 @@ La sortie doit être une liste JSON d'objets, chaque objet représentant une éc
 ]
 
 Définitions :
-- "Nom de l'école" : nom officiel de l'établissement.
-- "Type" : école maternelle, élémentaire, collège, lycée, etc.
-- "Statut" : "Public" ou "Privé sous contrat" (ou "Privé hors contrat" si tu en trouves).
-- "IPS" : Indice de Position Sociale (nombre, par exemple "110") ou "Non disponible".
-- "Qualité de l'enseignement" : appréciation qualitative (ex : "Excellente", "Bonne", "Moyenne", "Faible") ou note /10.
-- "Taux d'absence des professeurs" : pourcentage ou appréciation (ex : "2%", "Faible", "Élevé").
-- "Qualité de l'infrastructure" : état des bâtiments, équipements (ex : "Moderne", "Vieillissant", "Bonne").
-- "Quartiers rattachés" : liste des quartiers de la ville qui dépendent de cette école (séparés par des virgules).
+- "Nom de l'école" : nom officiel.
+- "Type" : maternelle, élémentaire, collège, lycée, etc.
+- "Statut" : "Public", "Privé sous contrat", "Privé hors contrat".
+- "IPS" : indice de position sociale (ex : "110") ou "Non disponible".
+- "Qualité de l'enseignement" : appréciation factuelle (ex : "Bonne", "Excellente") ou "Non disponible".
+- "Taux d'absence des professeurs" : pourcentage ou "Non disponible".
+- "Qualité de l'infrastructure" : description factuelle ou "Non disponible".
+- "Quartiers rattachés" : liste des quartiers séparés par des virgules, basée sur la carte scolaire officielle. Ex : "Centre-ville, Quartier Nord".
 
-Si une information est inconnue, écris "Non disponible". Assure-toi d'inclure à la fois les écoles publiques et privées, et de couvrir tous les niveaux (maternelle, élémentaire, collège, lycée).
+Si une information est incertaine, utilise "Non disponible". N'invente aucune donnée.
 
-Exemple de format attendu (ne pas utiliser ces valeurs) :
+Exemple (ne pas utiliser ces valeurs) :
 [
-  {{"Nom de l'école": "École Jean Jaurès", "Type": "Élémentaire", "Statut": "Public", "IPS": "105", "Qualité de l'enseignement": "Bonne", "Taux d'absence des professeurs": "3%", "Qualité de l'infrastructure": "Correcte", "Quartiers rattachés": "Centre-ville, Quartier Nord"}},
-  {{"Nom de l'école": "Collège Victor Hugo", "Type": "Collège", "Statut": "Public", "IPS": "120", "Qualité de l'enseignement": "Très bonne", "Taux d'absence des professeurs": "1,5%", "Qualité de l'infrastructure": "Bonne", "Quartiers rattachés": "Centre-ville"}},
-  {{"Nom de l'école": "Institution Sainte-Marie", "Type": "Collège", "Statut": "Privé sous contrat", "IPS": "130", "Qualité de l'enseignement": "Excellente", "Taux d'absence des professeurs": "1%", "Qualité de l'infrastructure": "Très bonne", "Quartiers rattachés": "Centre-ville, Quartier Ouest"}}
+  {{"Nom de l'école": "École Jean Jaurès", "Type": "Élémentaire", "Statut": "Public", "IPS": "105", "Qualité de l'enseignement": "Bonne", "Taux d'absence des professeurs": "Non disponible", "Qualité de l'infrastructure": "Correcte", "Quartiers rattachés": "Centre-ville, Quartier Nord"}},
+  {{"Nom de l'école": "Collège Victor Hugo", "Type": "Collège", "Statut": "Public", "IPS": "120", "Qualité de l'enseignement": "Très bonne", "Taux d'absence des professeurs": "1,5%", "Qualité de l'infrastructure": "Bonne", "Quartiers rattachés": "Centre-ville"}}
 ]
-                """
+"""
 
                 with st.spinner("Analyse des écoles en cours..."):
                     reponse = model.generate_content(
@@ -549,7 +556,10 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
                         st.stop()
 
                     df_ecoles = pd.DataFrame(ecoles)
-                    if not df_ecoles.empty:
+                    ordre_types = ["École maternelle", "École élémentaire", "Collège", "Lycée"]
+                    df_ecoles["Type"] = pd.Categorical(df_ecoles["Type"], categories=ordre_types, ordered=True)
+                    df_ecoles = df_ecoles.sort_values("Type")
+                        if not df_ecoles.empty:
                         df_ecoles_wrapped = df_ecoles.map(lambda x: wrap_text(x, max_chars=40))
                         df_ecoles_wrapped = df_ecoles_wrapped.fillna("")
 
