@@ -496,7 +496,9 @@ with tab3:
         else:
             try:
                 prompt_ecoles = f"""
-Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante : {ville_ecoles}, tu dois établir la liste **exhaustive** des établissements scolaires (publics et privés sous contrat), en utilisant les données officielles les plus récentes.
+Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante : {ville_ecoles}, tu dois établir la liste **exhaustive** des établissements scolaires, en distinguant clairement les **écoles publiques** et les **écoles privées sous contrat** (et hors contrat si pertinent).
+
+Pour ce faire, tu t'appuies sur les **données officielles** disponibles en ligne : sites du Ministère de l'Éducation nationale, annuaires des académies, portails des mairies, listes des établissements publics et privés, etc. Tu croises ces sources pour obtenir une liste fiable et à jour.
 
 ## MÉTHODOLOGIE OBLIGATOIRE
 
@@ -542,7 +544,7 @@ Exemple (ne pas utiliser ces valeurs) :
   {{"Nom de l'école": "École Jean Jaurès", "Type": "Élémentaire", "Statut": "Public", "IPS": "105", "Qualité de l'enseignement": "Bonne", "Taux d'absence des professeurs": "Non disponible", "Qualité de l'infrastructure": "Correcte", "Quartiers rattachés": "Centre-ville, Quartier Nord"}},
   {{"Nom de l'école": "Collège Victor Hugo", "Type": "Collège", "Statut": "Public", "IPS": "120", "Qualité de l'enseignement": "Très bonne", "Taux d'absence des professeurs": "1,5%", "Qualité de l'infrastructure": "Bonne", "Quartiers rattachés": "Centre-ville"}}
 ]
-"""
+                """
 
                 with st.spinner("Analyse des écoles en cours..."):
                     reponse = model.generate_content(
@@ -556,10 +558,12 @@ Exemple (ne pas utiliser ces valeurs) :
                         st.stop()
 
                     df_ecoles = pd.DataFrame(ecoles)
-                    ordre_types = ["École maternelle", "École élémentaire", "Collège", "Lycée"]
-                    df_ecoles["Type"] = pd.Categorical(df_ecoles["Type"], categories=ordre_types, ordered=True)
-                    df_ecoles = df_ecoles.sort_values("Type")
-                        if not df_ecoles.empty:
+                    if not df_ecoles.empty:
+                        # Tri par type d'établissement
+                        ordre_types = ["École maternelle", "École élémentaire", "Collège", "Lycée"]
+                        df_ecoles["Type"] = pd.Categorical(df_ecoles["Type"], categories=ordre_types, ordered=True)
+                        df_ecoles = df_ecoles.sort_values("Type")
+
                         df_ecoles_wrapped = df_ecoles.map(lambda x: wrap_text(x, max_chars=40))
                         df_ecoles_wrapped = df_ecoles_wrapped.fillna("")
 
