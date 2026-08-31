@@ -501,7 +501,9 @@ with tab3:
         else:
             try:
                 prompt_ecoles = f"""
-Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante : {ville_ecoles}, tu dois lister les **établissements scolaires** (écoles maternelles, élémentaires, collèges, lycées) publics et privés sous contrat, avec les indicateurs suivants.
+Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante : {ville_ecoles}, tu dois établir la liste **exhaustive** des établissements scolaires, en distinguant clairement les **écoles publiques** et les **écoles privées sous contrat** (et hors contrat si pertinent).
+
+Pour ce faire, tu t'appuies sur les **données officielles** disponibles en ligne : sites du Ministère de l'Éducation nationale, annuaires des académies, portails des mairies, listes des établissements publics et privés, etc. Tu croises ces sources pour obtenir une liste fiable et à jour.
 
 Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown, sans commentaire.
 
@@ -511,6 +513,7 @@ La sortie doit être une liste JSON d'objets, chaque objet représentant une éc
   {{
     "Nom de l'école": "",
     "Type": "",
+    "Statut": "",
     "IPS": "",
     "Qualité de l'enseignement": "",
     "Taux d'absence des professeurs": "",
@@ -522,18 +525,20 @@ La sortie doit être une liste JSON d'objets, chaque objet représentant une éc
 Définitions :
 - "Nom de l'école" : nom officiel de l'établissement.
 - "Type" : école maternelle, élémentaire, collège, lycée, etc.
+- "Statut" : "Public" ou "Privé sous contrat" (ou "Privé hors contrat" si tu en trouves).
 - "IPS" : Indice de Position Sociale (nombre, par exemple "110") ou "Non disponible".
 - "Qualité de l'enseignement" : appréciation qualitative (ex : "Excellente", "Bonne", "Moyenne", "Faible") ou note /10.
 - "Taux d'absence des professeurs" : pourcentage ou appréciation (ex : "2%", "Faible", "Élevé").
 - "Qualité de l'infrastructure" : état des bâtiments, équipements (ex : "Moderne", "Vieillissant", "Bonne").
 - "Quartiers rattachés" : liste des quartiers de la ville qui dépendent de cette école (séparés par des virgules).
 
-Si une information est inconnue, écris "Non disponible". Assure-toi de couvrir un échantillon représentatif des écoles de la ville.
+Si une information est inconnue, écris "Non disponible". Assure-toi d'inclure à la fois les écoles publiques et privées, et de couvrir tous les niveaux (maternelle, élémentaire, collège, lycée).
 
 Exemple de format attendu (ne pas utiliser ces valeurs) :
 [
-  {{"Nom de l'école": "École Jean Jaurès", "Type": "Élémentaire", "IPS": "105", "Qualité de l'enseignement": "Bonne", "Taux d'absence des professeurs": "3%", "Qualité de l'infrastructure": "Correcte", "Quartiers rattachés": "Centre-ville, Quartier Nord"}},
-  {{"Nom de l'école": "Collège Victor Hugo", "Type": "Collège", "IPS": "120", "Qualité de l'enseignement": "Très bonne", "Taux d'absence des professeurs": "1,5%", "Qualité de l'infrastructure": "Bonne", "Quartiers rattachés": "Centre-ville"}}
+  {{"Nom de l'école": "École Jean Jaurès", "Type": "Élémentaire", "Statut": "Public", "IPS": "105", "Qualité de l'enseignement": "Bonne", "Taux d'absence des professeurs": "3%", "Qualité de l'infrastructure": "Correcte", "Quartiers rattachés": "Centre-ville, Quartier Nord"}},
+  {{"Nom de l'école": "Collège Victor Hugo", "Type": "Collège", "Statut": "Public", "IPS": "120", "Qualité de l'enseignement": "Très bonne", "Taux d'absence des professeurs": "1,5%", "Qualité de l'infrastructure": "Bonne", "Quartiers rattachés": "Centre-ville"}},
+  {{"Nom de l'école": "Institution Sainte-Marie", "Type": "Collège", "Statut": "Privé sous contrat", "IPS": "130", "Qualité de l'enseignement": "Excellente", "Taux d'absence des professeurs": "1%", "Qualité de l'infrastructure": "Très bonne", "Quartiers rattachés": "Centre-ville, Quartier Ouest"}}
 ]
                 """
 
