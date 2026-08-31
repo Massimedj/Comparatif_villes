@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import streamlit as st
 import google.generativeai as genai
+import difflib
 
 from openpyxl.styles import Font, PatternFill
 from reportlab.lib.pagesizes import A4, landscape
@@ -115,6 +116,27 @@ def wrap_text(text, max_chars=50):
     if current_line:
         result.append(current_line)
     return "\n".join(result)
+
+
+def normalize_columns(df, expected_columns):
+    """
+    Renomme les colonnes du DataFrame pour correspondre aux noms attendus,
+    en utilisant une correspondance approximative si nécessaire.
+    """
+    actual_columns = list(df.columns)
+    if len(actual_columns) == len(expected_columns):
+        df.columns = expected_columns
+    else:
+        new_columns = []
+        for col in actual_columns:
+            # Cherche la meilleure correspondance
+            best_match = difflib.get_close_matches(col, expected_columns, n=1, cutoff=0.6)
+            if best_match:
+                new_columns.append(best_match[0])
+            else:
+                new_columns.append(col)
+        df.columns = new_columns
+    return df
 
 
 # --- CRÉATION DES TROIS ONGLETS ---
@@ -357,6 +379,7 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                     df_quartiers = pd.DataFrame(quartiers_data)
                     with st.expander(f"Quartiers - {ville}"):
                         if not df_quartiers.empty:
+                            df_quartiers = normalize_columns(df_quartiers, ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"])
                             df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
                             df_quartiers_wrapped = df_quartiers_wrapped.fillna("")
                             st.table(df_quartiers_wrapped.set_index("Nom").T)
@@ -448,9 +471,8 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
 
                     df_quartiers = pd.DataFrame(quartiers)
                     if not df_quartiers.empty:
-                        colonnes = ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"]
-                        colonnes_presentes = [c for c in colonnes if c in df_quartiers.columns]
-                        df_quartiers = df_quartiers[colonnes_presentes]
+                        # Normaliser les colonnes
+                        df_quartiers = normalize_columns(df_quartiers, ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"])
 
                         df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
                         df_quartiers_wrapped = df_quartiers_wrapped.fillna("")
@@ -559,10 +581,14 @@ Exemple (ne pas utiliser ces valeurs) :
 
                     df_ecoles = pd.DataFrame(ecoles)
                     if not df_ecoles.empty:
-                        # Remplacer les NaN dans la colonne Type
+                        # Normaliser les colonnes
+                        expected_ecoles_columns = ["Nom de l'école", "Type", "Statut", "IPS", "Qualité de l'enseignement", "Taux d'absence des professeurs", "Qualité de l'infrastructure", "Quartiers rattachés"]
+                        df_ecoles = normalize_columns(df_ecoles, expected_ecoles_columns)
+
+                        # Remplir les NaN de Type avec "Non spécifié"
                         df_ecoles["Type"] = df_ecoles["Type"].fillna("Non spécifié")
 
-                        # Définir l'ordre de tri
+                        # Tri par type
                         ordre_types = {
                             "École maternelle": 0,
                             "École élémentaire": 1,
@@ -573,10 +599,7 @@ Exemple (ne pas utiliser ces valeurs) :
                         }
 
                         def get_ordre_type(type_ecole):
-                            if type_ecole in ordre_types:
-                                return ordre_types[type_ecole]
-                            else:
-                                return ordre_types["Autre"]
+                            return ordre_types.get(type_ecole, ordre_types["Autre"])
 
                         df_ecoles["_ordre"] = df_ecoles["Type"].apply(get_ordre_type)
                         df_ecoles = df_ecoles.sort_values("_ordre")
