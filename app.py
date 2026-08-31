@@ -129,7 +129,6 @@ def normalize_columns(df, expected_columns):
     else:
         new_columns = []
         for col in actual_columns:
-            # Cherche la meilleure correspondance
             best_match = difflib.get_close_matches(col, expected_columns, n=1, cutoff=0.6)
             if best_match:
                 new_columns.append(best_match[0])
@@ -137,6 +136,21 @@ def normalize_columns(df, expected_columns):
                 new_columns.append(col)
         df.columns = new_columns
     return df
+
+
+def extract_json_from_response(response):
+    """
+    Extrait le texte JSON d'une réponse Gemini en ignorant les appels de fonction.
+    """
+    texte_json = ""
+    if response.parts:
+        for part in response.parts:
+            if hasattr(part, 'text') and part.text:
+                texte_json += part.text
+    if not texte_json.strip():
+        # fallback
+        texte_json = response.text
+    return texte_json
 
 
 # --- CRÉATION DES TROIS ONGLETS ---
@@ -241,7 +255,7 @@ Champs texte libre — 1 à 3 phrases courtes, factuelles, sans marketing (ou "N
 
 ## FORMAT DE SORTIE — CONTRAINTE ABSOLUE
 
-Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown (pas de ```json), sans commentaire.
+Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown (pas de ```json), sans commentaire. **N'utilise jamais d'appel de fonction.**
 
 La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEMENT les clés suivantes, dans cet ordre, avec des valeurs qui sont TOUTES des chaînes de caractères, SAUF pour la clé "Quartiers" qui doit être une liste d'objets comme défini ci-dessus :
 
@@ -348,10 +362,11 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                 with st.spinner("Gemini analyse le marché immobilier en cours..."):
                     reponse = model.generate_content(
                         prompt,
-                        generation_config={"response_mime_type": "application/json"}
+                        generation_config={"response_mime_type": "application/json", "temperature": 0}
                     )
+                    texte_json = extract_json_from_response(reponse)
                     try:
-                        donnees = json.loads(reponse.text)
+                        donnees = json.loads(texte_json)
                     except json.JSONDecodeError:
                         st.error("❌ Erreur dans le format retourné par l'IA. Veuillez relancer la comparaison.")
                         st.stop()
@@ -426,6 +441,8 @@ with tab2:
                 prompt_quartiers = f"""
 Tu es un expert en analyse urbaine et immobilière. Pour la ville suivante : {ville_quartiers}, tu dois lister **tous les quartiers** (ou zones cohérentes) avec leurs caractéristiques détaillées.
 
+**Important : ne jamais utiliser d'appel de fonction. Retourne uniquement du JSON pur.**
+
 Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown, sans commentaire.
 
 La sortie doit être une liste JSON d'objets, chaque objet représentant un quartier. Chaque objet doit contenir EXACTEMENT les clés suivantes, dans cet ordre, avec des valeurs qui sont TOUTES des chaînes de caractères :
@@ -461,10 +478,11 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
                 with st.spinner("Analyse des quartiers en cours..."):
                     reponse = model.generate_content(
                         prompt_quartiers,
-                        generation_config={"response_mime_type": "application/json"}
+                        generation_config={"response_mime_type": "application/json", "temperature": 0}
                     )
+                    texte_json = extract_json_from_response(reponse)
                     try:
-                        quartiers = json.loads(reponse.text)
+                        quartiers = json.loads(texte_json)
                     except json.JSONDecodeError:
                         st.error("❌ Erreur dans le format retourné par l'IA.")
                         st.stop()
@@ -522,6 +540,8 @@ Tu es un expert en éducation et en analyse territoriale. Pour la ville suivante
 
 Pour ce faire, tu t'appuies sur les **données officielles** disponibles en ligne : sites du Ministère de l'Éducation nationale, annuaires des académies, portails des mairies, listes des établissements publics et privés, etc. Tu croises ces sources pour obtenir une liste fiable et à jour.
 
+**Important : ne jamais utiliser d'appel de fonction. Retourne uniquement du JSON pur.**
+
 ## MÉTHODOLOGIE OBLIGATOIRE
 
 1. **Sectorisation** : consulte la carte scolaire officielle (sites des académies, mairies, ou données du Ministère) pour associer chaque école aux **quartiers de rattachement** exacts.
@@ -571,10 +591,11 @@ Exemple (ne pas utiliser ces valeurs) :
                 with st.spinner("Analyse des écoles en cours..."):
                     reponse = model.generate_content(
                         prompt_ecoles,
-                        generation_config={"response_mime_type": "application/json"}
+                        generation_config={"response_mime_type": "application/json", "temperature": 0}
                     )
+                    texte_json = extract_json_from_response(reponse)
                     try:
-                        ecoles = json.loads(reponse.text)
+                        ecoles = json.loads(texte_json)
                     except json.JSONDecodeError:
                         st.error("❌ Erreur dans le format retourné par l'IA.")
                         st.stop()
