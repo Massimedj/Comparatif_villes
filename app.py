@@ -559,10 +559,28 @@ Exemple (ne pas utiliser ces valeurs) :
 
                     df_ecoles = pd.DataFrame(ecoles)
                     if not df_ecoles.empty:
-                        # Tri par type d'établissement
-                        ordre_types = ["École maternelle", "École élémentaire", "Collège", "Lycée"]
-                        df_ecoles["Type"] = pd.Categorical(df_ecoles["Type"], categories=ordre_types, ordered=True)
-                        df_ecoles = df_ecoles.sort_values("Type")
+                        # Remplacer les NaN dans la colonne Type
+                        df_ecoles["Type"] = df_ecoles["Type"].fillna("Non spécifié")
+
+                        # Définir l'ordre de tri
+                        ordre_types = {
+                            "École maternelle": 0,
+                            "École élémentaire": 1,
+                            "Collège": 2,
+                            "Lycée": 3,
+                            "Autre": 4,
+                            "Non spécifié": 5
+                        }
+
+                        def get_ordre_type(type_ecole):
+                            if type_ecole in ordre_types:
+                                return ordre_types[type_ecole]
+                            else:
+                                return ordre_types["Autre"]
+
+                        df_ecoles["_ordre"] = df_ecoles["Type"].apply(get_ordre_type)
+                        df_ecoles = df_ecoles.sort_values("_ordre")
+                        df_ecoles = df_ecoles.drop(columns=["_ordre"])
 
                         df_ecoles_wrapped = df_ecoles.map(lambda x: wrap_text(x, max_chars=40))
                         df_ecoles_wrapped = df_ecoles_wrapped.fillna("")
