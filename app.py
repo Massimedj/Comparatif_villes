@@ -12,9 +12,9 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 # Configuration de la page web
-st.set_page_config(page_title="Comparateur Immobilier & Scolaire", page_icon="🏡", layout="centered")
+st.set_page_config(page_title="Comparateur Pour Achat Immobilier", page_icon="🏡", layout="centered")
 
-st.title("🏡 Comparateur Immobilier & Scolaire")
+st.title("🏡 Comparateur Pour Achat Immobilier")
 st.write("Analysez et comparez des villes, leurs quartiers et leurs écoles.")
 
 # Vérification préalable de la clé API
