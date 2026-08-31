@@ -12,7 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 # Configuration de la page web
-st.set_page_config(page_title="Comparateur Pour Achat Immobilier", page_icon="🏡", layout="centered")
+st.set_page_config(page_title="Comparateur Pour Achat Immobilier", page_icon="🏡", layout="wide")
 
 st.title("🏡 Comparateur Pour Achat Immobilier")
 st.write("Analysez et comparez des villes, leurs quartiers et leurs écoles.")
@@ -24,25 +24,22 @@ if "GEMINI_API_KEY" not in st.secrets:
 
 api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
-# Modèle mis à jour : gemini-3.6-flash
 model = genai.GenerativeModel('gemini-3.6-flash')
 
 
 # --- FONCTIONS D'EXPORT ---
 
 def generer_excel_simple(df, sheet_name="Données"):
-    """Exporte un DataFrame vers Excel sans transposition (lignes = entités)."""
+    """Exporte un DataFrame vers Excel sans transposition."""
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         df.to_excel(writer, sheet_name=sheet_name, index=False)
         feuille = writer.sheets[sheet_name]
 
-        # Mise en forme de l'en-tête
         for cellule in feuille[1]:
             cellule.font = Font(bold=True, color="FFFFFF")
             cellule.fill = PatternFill(start_color="FF4B4B", end_color="FF4B4B", fill_type="solid")
 
-        # Ajustement des largeurs de colonnes
         for colonne in feuille.columns:
             longueur_max = max((len(str(c.value)) for c in colonne if c.value is not None), default=10)
             lettre_colonne = colonne[0].column_letter
@@ -74,7 +71,6 @@ def generer_pdf_simple(df, title="Tableau"):
         Spacer(1, 0.5 * cm)
     ]
 
-    # Construction du tableau avec retour à la ligne automatique dans les cellules
     data = [[Paragraph(str(col), header_style) for col in df.columns]]
     for _, ligne in df.iterrows():
         row = [Paragraph(str(v), cell_style) for v in ligne]
@@ -96,6 +92,31 @@ def generer_pdf_simple(df, title="Tableau"):
     elements.append(table)
     doc.build(elements)
     return buffer.getvalue()
+
+
+def wrap_text(text, max_chars=50):
+    """Insère des retours à la ligne dans une chaîne pour améliorer l'affichage."""
+    if not isinstance(text, str):
+        return text
+    # Si le texte contient déjà des retours, on le laisse
+    if "\n" in text:
+        return text
+    # Découpage naïf tous les max_chars caractères ou après des virgules
+    words = text.split(", ")
+    result = []
+    current_line = ""
+    for word in words:
+        if len(current_line) + len(word) + 2 > max_chars:
+            result.append(current_line)
+            current_line = word
+        else:
+            if current_line:
+                current_line += ", " + word
+            else:
+                current_line = word
+    if current_line:
+        result.append(current_line)
+    return "\n".join(result)
 
 
 # --- CRÉATION DES TROIS ONGLETS ---
@@ -320,7 +341,6 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
             except Exception as e:
                 st.error(f"Une erreur s'est produite lors de la génération. Détails techniques : {e}")
 
-    # Affichage et export pour l'onglet Villes
     if "df_villes" in st.session_state:
         df = st.session_state["df_villes"]
         st.success("Analyse terminée !")
@@ -339,7 +359,9 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                     df_quartiers = pd.DataFrame(quartiers_data)
                     with st.expander(f"Quartiers - {ville}"):
                         if not df_quartiers.empty:
-                            st.dataframe(df_quartiers, use_container_width=True)
+                            # Appliquer wrap_text sur toutes les cellules pour un meilleur affichage
+                            df_quartiers_wrapped = df_quartiers.applymap(lambda x: wrap_text(x, max_chars=40))
+                            st.table(df_quartiers_wrapped.set_index("Nom").T)  # Transposition pour style similaire
                         else:
                             st.write("Aucun détail de quartier disponible.")
                 else:
@@ -355,14 +377,14 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
         if format_export == "Excel":
             st.download_button(
                 label="📥 Télécharger en Excel",
-                data=generer_excel(df_export),
+                data=generer_excel_simple(df_export),
                 file_name="comparaison_villes.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
         else:
             st.download_button(
                 label="📥 Télécharger en PDF",
-                data=generer_pdf(df_export),
+                data=generer_pdf_simple(df_export, title="Comparaison de villes"),
                 file_name="comparaison_villes.pdf",
                 mime="application/pdf"
             )
@@ -428,14 +450,21 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
 
                     df_quartiers = pd.DataFrame(quartiers)
                     if not df_quartiers.empty:
-                        # Réorganiser les colonnes si nécessaire
+                        # Réorganiser les colonnes
                         colonnes = ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"]
                         colonnes_presentes = [c for c in colonnes if c in df_quartiers.columns]
                         df_quartiers = df_quartiers[colonnes_presentes]
-                        st.success(f"✅ {len(df_quartiers)} quartiers trouvés pour {ville_quartiers}.")
-                        st.dataframe(df_quartiers, use_container_width=True)
 
-                        # Export des quartiers
+                        # Appliquer wrap_text sur toutes les cellules
+                        df_quartiers_wrapped = df_quartiers.applymap(lambda x: wrap_text(x, max_chars=40))
+
+                        # Transposer pour affichage style villes : lignes = attributs, colonnes = quartiers
+                        df_quartiers_display = df_quartiers_wrapped.set_index("Nom").T
+
+                        st.success(f"✅ {len(df_quartiers)} quartiers trouvés pour {ville_quartiers}.")
+                        st.table(df_quartiers_display)
+
+                        # Export des quartiers (version non transposée)
                         st.subheader("💾 Exporter les quartiers")
                         format_export_q = st.radio("Format :", ["Excel", "PDF"], horizontal=True, key="export_quartiers")
                         if format_export_q == "Excel":
@@ -521,10 +550,16 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
 
                     df_ecoles = pd.DataFrame(ecoles)
                     if not df_ecoles.empty:
-                        st.success(f"✅ {len(df_ecoles)} écoles trouvées pour {ville_ecoles}.")
-                        st.dataframe(df_ecoles, use_container_width=True)
+                        # Appliquer wrap_text sur toutes les cellules
+                        df_ecoles_wrapped = df_ecoles.applymap(lambda x: wrap_text(x, max_chars=40))
 
-                        # Export des écoles
+                        # Transposer pour affichage style villes : lignes = attributs, colonnes = écoles
+                        df_ecoles_display = df_ecoles_wrapped.set_index("Nom de l'école").T
+
+                        st.success(f"✅ {len(df_ecoles)} écoles trouvées pour {ville_ecoles}.")
+                        st.table(df_ecoles_display)
+
+                        # Export des écoles (version non transposée)
                         st.subheader("💾 Exporter les écoles")
                         format_export_e = st.radio("Format :", ["Excel", "PDF"], horizontal=True, key="export_ecoles")
                         if format_export_e == "Excel":
