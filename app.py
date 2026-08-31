@@ -98,10 +98,8 @@ def wrap_text(text, max_chars=50):
     """Insère des retours à la ligne dans une chaîne pour améliorer l'affichage."""
     if not isinstance(text, str):
         return text
-    # Si le texte contient déjà des retours, on le laisse
     if "\n" in text:
         return text
-    # Découpage naïf tous les max_chars caractères ou après des virgules
     words = text.split(", ")
     result = []
     current_line = ""
@@ -359,9 +357,9 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                     df_quartiers = pd.DataFrame(quartiers_data)
                     with st.expander(f"Quartiers - {ville}"):
                         if not df_quartiers.empty:
-                            # Appliquer wrap_text sur toutes les cellules pour un meilleur affichage
                             df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
-                            st.table(df_quartiers_wrapped.set_index("Nom").T)  # Transposition pour style similaire
+                            df_quartiers_wrapped = df_quartiers_wrapped.fillna("")
+                            st.table(df_quartiers_wrapped.set_index("Nom").T)
                         else:
                             st.write("Aucun détail de quartier disponible.")
                 else:
@@ -450,21 +448,18 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
 
                     df_quartiers = pd.DataFrame(quartiers)
                     if not df_quartiers.empty:
-                        # Réorganiser les colonnes
                         colonnes = ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"]
                         colonnes_presentes = [c for c in colonnes if c in df_quartiers.columns]
                         df_quartiers = df_quartiers[colonnes_presentes]
 
-                        # Appliquer wrap_text sur toutes les cellules
                         df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
+                        df_quartiers_wrapped = df_quartiers_wrapped.fillna("")
 
-                        # Transposer pour affichage style villes : lignes = attributs, colonnes = quartiers
                         df_quartiers_display = df_quartiers_wrapped.set_index("Nom").T
 
                         st.success(f"✅ {len(df_quartiers)} quartiers trouvés pour {ville_quartiers}.")
                         st.table(df_quartiers_display)
 
-                        # Export des quartiers (version non transposée)
                         st.subheader("💾 Exporter les quartiers")
                         format_export_q = st.radio("Format :", ["Excel", "PDF"], horizontal=True, key="export_quartiers")
                         if format_export_q == "Excel":
@@ -555,16 +550,14 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
 
                     df_ecoles = pd.DataFrame(ecoles)
                     if not df_ecoles.empty:
-                        # Appliquer wrap_text sur toutes les cellules
                         df_ecoles_wrapped = df_ecoles.map(lambda x: wrap_text(x, max_chars=40))
+                        df_ecoles_wrapped = df_ecoles_wrapped.fillna("")
 
-                        # Transposer pour affichage style villes : lignes = attributs, colonnes = écoles
                         df_ecoles_display = df_ecoles_wrapped.set_index("Nom de l'école").T
 
                         st.success(f"✅ {len(df_ecoles)} écoles trouvées pour {ville_ecoles}.")
                         st.table(df_ecoles_display)
 
-                        # Export des écoles (version non transposée)
                         st.subheader("💾 Exporter les écoles")
                         format_export_e = st.radio("Format :", ["Excel", "PDF"], horizontal=True, key="export_ecoles")
                         if format_export_e == "Excel":
