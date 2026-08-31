@@ -360,7 +360,7 @@ Génère maintenant la réponse pour les villes suivantes : {villes_input}
                     with st.expander(f"Quartiers - {ville}"):
                         if not df_quartiers.empty:
                             # Appliquer wrap_text sur toutes les cellules pour un meilleur affichage
-                            df_quartiers_wrapped = df_quartiers.applymap(lambda x: wrap_text(x, max_chars=40))
+                            df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
                             st.table(df_quartiers_wrapped.set_index("Nom").T)  # Transposition pour style similaire
                         else:
                             st.write("Aucun détail de quartier disponible.")
@@ -456,7 +456,7 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
                         df_quartiers = df_quartiers[colonnes_presentes]
 
                         # Appliquer wrap_text sur toutes les cellules
-                        df_quartiers_wrapped = df_quartiers.applymap(lambda x: wrap_text(x, max_chars=40))
+                        df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
 
                         # Transposer pour affichage style villes : lignes = attributs, colonnes = quartiers
                         df_quartiers_display = df_quartiers_wrapped.set_index("Nom").T
@@ -556,7 +556,7 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
                     df_ecoles = pd.DataFrame(ecoles)
                     if not df_ecoles.empty:
                         # Appliquer wrap_text sur toutes les cellules
-                        df_ecoles_wrapped = df_ecoles.applymap(lambda x: wrap_text(x, max_chars=40))
+                        df_ecoles_wrapped = df_ecoles.map(lambda x: wrap_text(x, max_chars=40))
 
                         # Transposer pour affichage style villes : lignes = attributs, colonnes = écoles
                         df_ecoles_display = df_ecoles_wrapped.set_index("Nom de l'école").T
