@@ -227,6 +227,7 @@ Champs numériques — chaîne de caractères ne contenant QUE des chiffres, san
 - "Prix maison (€/m²)" : prix moyen/médian estimé des maisons en euros et ajouter "€" à la fin. Ex : "3200€"
 - "Prix appartement (€/m²)" : prix moyen/médian estimé des appartements en euros et ajouter "€" à la fin. Ex : "4100€"
 - "Temps vers Paris" : temps de trajet réaliste vers Paris intra-muros en minutes et ajouter "min" à la fin, en priorité en transport en commun. Ex : "35 min"
+- "Moyenne d'âge des résidents" : âge moyen estimé des habitants de la ville en années, et ajouter "ans" à la fin. Ex : "41 ans"
 
 Champs de pourcentage — chaîne au format "XX%" :
 - "Part maisons" / "Part appartements" : doivent sommer à 100% (sauf "Non disponible")
@@ -271,6 +272,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Propriétaires": "",
     "Locataires": "",
     "Profil socio-économique": "",
+    "Moyenne d'âge des résidents": "",
     "Sécurité": "",
     "Qualité des écoles": "",
     "Infrastructures sportives": "",
@@ -304,6 +306,7 @@ La sortie doit être une liste JSON d'objets. Chaque objet doit contenir EXACTEM
     "Propriétaires": "58%",
     "Locataires": "42%",
     "Profil socio-économique": "CSP+ aisée, nombreuses familles avec enfants",
+    "Moyenne d'âge des résidents": "39 ans",
     "Sécurité": "8/10 (faible délinquance, ville résidentielle)",
     "Qualité des écoles": "5/10 (établissements réputés, options internationales)",
     "Infrastructures sportives": "4/10 (nombreux clubs et équipements)",
@@ -347,7 +350,7 @@ Les réponses doivent être synthétiques, factuelles, comparables d'une ville �
 ## CONTRÔLE DE COHÉRENCE (à effectuer silencieusement avant de répondre)
 
 1. Toutes les villes de {villes_input} sont présentes, dans le même ordre, sans ajout ni omission.
-2. Chaque objet possède exactement les 25 clés demandées, dans le même ordre, sans clé en trop ni manquante.
+2. Chaque objet possède exactement les 26 clés demandées, dans le même ordre, sans clé en trop ni manquante.
 3. Toutes les valeurs sont des chaînes de caractères, sauf "Quartiers" qui doit être une liste d'objets.
 4. Les champs numériques (Population, Prix maison, Prix appartement, Temps vers Paris) ne contiennent que des chiffres, sans unité ni séparateur.
 5. Les champs de pourcentage sont au format "XX%" et les paires (Part maisons/Part appartements, Propriétaires/Locataires) somment à 100% sauf "Non disponible".
@@ -452,6 +455,7 @@ La sortie doit être une liste JSON d'objets, chaque objet représentant un quar
     "Nom": "",
     "Caractéristiques": "",
     "Catégorie sociale": "",
+    "Moyenne d'âge des résidents": "",
     "Sécurité": "",
     "Écoles": "",
     "Transports": ""
@@ -462,6 +466,7 @@ Définitions :
 - "Nom" : nom du quartier.
 - "Caractéristiques" : type d'habitat, ambiance, commodités principales.
 - "Catégorie sociale" : catégorie socio-professionnelle dominante.
+- "Moyenne d'âge des résidents" : âge moyen estimé des habitants du quartier, en années, et ajouter "ans" à la fin. Ex : "37 ans".
 - "Sécurité" : niveau de sécurité ressenti (ex : Très bonne, Bonne, Correcte, Faible, etc.).
 - "Écoles" : écoles de rattachement (noms ou types, séparés par des virgules).
 - "Transports" : modes de transport disponibles et accessibilité.
@@ -470,8 +475,8 @@ Si une information est inconnue, écris "Non disponible". Assure-toi de couvrir 
 
 Exemple de format attendu (ne pas utiliser ces valeurs) :
 [
-  {{"Nom": "Centre-ville", "Caractéristiques": "Appartements anciens, commerces", "Catégorie sociale": "Mixte", "Sécurité": "Bonne", "Écoles": "Lycée X, Collège Y", "Transports": "Bus, gare"}},
-  {{"Nom": "Quartier Nord", "Caractéristiques": "Pavillonnaire, calme", "Catégorie sociale": "Familles", "Sécurité": "Très bonne", "Écoles": "École primaire Z", "Transports": "Bus"}}
+  {{"Nom": "Centre-ville", "Caractéristiques": "Appartements anciens, commerces", "Catégorie sociale": "Mixte", "Moyenne d'âge des résidents": "42 ans", "Sécurité": "Bonne", "Écoles": "Lycée X, Collège Y", "Transports": "Bus, gare"}},
+  {{"Nom": "Quartier Nord", "Caractéristiques": "Pavillonnaire, calme", "Catégorie sociale": "Familles", "Moyenne d'âge des résidents": "36 ans", "Sécurité": "Très bonne", "Écoles": "École primaire Z", "Transports": "Bus"}}
 ]
                 """
 
@@ -490,7 +495,7 @@ Exemple de format attendu (ne pas utiliser ces valeurs) :
                     df_quartiers = pd.DataFrame(quartiers)
                     if not df_quartiers.empty:
                         # Normaliser les colonnes
-                        df_quartiers = normalize_columns(df_quartiers, ["Nom", "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles", "Transports"])
+                        df_quartiers = normalize_columns(df_quartiers, ["Nom", "Caractéristiques", "Catégorie sociale", "Moyenne d'âge des résidents", "Sécurité", "Écoles", "Transports"])
 
                         df_quartiers_wrapped = df_quartiers.map(lambda x: wrap_text(x, max_chars=40))
                         df_quartiers_wrapped = df_quartiers_wrapped.fillna("")
