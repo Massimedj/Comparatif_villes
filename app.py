@@ -698,7 +698,7 @@ Avant de répondre, vérifie les points suivants :
 Si un point ne peut pas être validé, corrige la valeur concernée ou indique `Non disponible`. Ne masque jamais une incertitude pour donner un résultat qui paraît plus complet.
 
 Génère maintenant la réponse pour les communes suivantes : {villes_input}
-"""
+                """
 
 
                 with st.spinner("Gemini analyse le marché immobilier en cours..."):
@@ -1180,7 +1180,7 @@ Ne réutilise pas les noms, les valeurs ni les rattachements ci-dessous. Cet exe
 ]
 
 Génère maintenant l'inventaire pour la commune suivante : {ville_ecoles}
-"""
+                """
 
 
                 with st.spinner("Analyse des écoles en cours..."):
