@@ -175,7 +175,7 @@ with tab1:
             st.warning("⚠️ Veuillez entrer au moins une ville.")
         else:
             try:
-               prompt = f"""
+                prompt = f"""
 Tu es un expert senior de l'immobilier résidentiel en France, spécialisé dans l'analyse des marchés locaux, de l'attractivité territoriale, du cadre de vie, des quartiers et du potentiel patrimonial.
 
 Ta mission est de réaliser une analyse comparative rigoureuse, factuelle, actualisée et homogène des communes suivantes :
@@ -723,7 +723,7 @@ Génère maintenant la réponse pour les communes suivantes : {villes_input}
         st.success("Analyse terminée !")
         st.subheader("📊 Résultat de l'analyse :")
 
-        if "Ville" in df.columns and "Quartiers principaux" in df.columns and "Quartiers" in df.columns:
+        if "Ville" in df.columns and "Quartiers" in df.columns:
             df_affichage = df.drop(columns=["Quartiers"])
             df_transpose = df_affichage.set_index("Ville").T
             st.table(df_transpose)
@@ -780,14 +780,292 @@ with tab2:
             st.warning("⚠️ Veuillez entrer un nom de ville.")
         else:
             try:
-                prompt_quartiers = f"""
-Tu es un expert en analyse urbaine et immobilière. Pour la ville suivante : {ville_quartiers}, tu dois lister **tous les quartiers** (ou zones cohérentes) avec leurs caractéristiques détaillées.
 
-**Important : ne jamais utiliser d'appel de fonction. Retourne uniquement du JSON pur.**
+prompt_quartiers = f"""
+Tu es un expert en analyse urbaine, démographie, sociologie territoriale et immobilier résidentiel en France.
 
-Retourne EXCLUSIVEMENT un JSON valide, sans aucun texte avant ou après, sans balises markdown, sans commentaire.
+Ta mission est de réaliser un inventaire aussi exhaustif et fiable que possible des quartiers, secteurs résidentiels et zones géographiques cohérentes de la commune suivante :
 
-La sortie doit être une liste JSON d'objets, chaque objet représentant un quartier. Chaque objet doit contenir EXACTEMENT les clés suivantes, dans cet ordre, avec des valeurs qui sont TOUTES des chaînes de caractères :
+COMMUNE À ANALYSER : {ville_quartiers}
+
+L'objectif est de fournir une analyse détaillée permettant à une famille souhaitant acheter un bien immobilier de comprendre les différences entre les quartiers et d'identifier les secteurs les plus adaptés à son projet de vie.
+
+==================================================
+1. RÈGLES FONDAMENTALES
+==================================================
+
+- Ne jamais utiliser d'appel de fonction ou d'outil externe.
+- Retourner exclusivement un JSON valide, sans texte avant ou après.
+- Ne jamais inventer une information pour compléter une rubrique.
+- Ne jamais présenter une supposition comme un fait établi.
+- Ne jamais attribuer à un quartier une caractéristique qui concerne uniquement l'ensemble de la commune.
+- Ne jamais confondre une donnée statistique, une observation urbaine et une appréciation subjective.
+- Privilégier la fiabilité des informations plutôt que la quantité de détails.
+- Ne pas produire de classement artificiel des quartiers.
+- Ne pas favoriser systématiquement le centre-ville au détriment des quartiers périphériques.
+
+En cas d'information inconnue, insuffisamment documentée ou impossible à vérifier à l'échelle du quartier, écrire précisément :
+"Non disponible".
+
+==================================================
+2. IDENTIFICATION ET EXHAUSTIVITÉ DES QUARTIERS
+==================================================
+
+Tu dois identifier tous les quartiers et secteurs significatifs de la commune, et pas uniquement les quartiers les plus connus ou les plus centraux.
+
+Pour établir cet inventaire, prends en compte, lorsqu'ils existent :
+
+- Les quartiers officiellement reconnus par la mairie.
+- Les quartiers mentionnés dans les documents d'urbanisme et les plans de la commune.
+- Les secteurs résidentiels portant un nom localement reconnu.
+- Les quartiers périphériques et les zones pavillonnaires.
+- Les hameaux, lieux-dits et anciennes zones urbanisées lorsqu'ils constituent des secteurs résidentiels identifiables.
+- Les secteurs présentant une identité urbaine ou immobilière distincte.
+
+Règles géographiques impératives :
+
+- Respecter strictement les limites administratives de la commune étudiée.
+- Ne pas intégrer les quartiers d'une commune voisine, même s'ils sont proches ou appartiennent au même bassin de vie.
+- Ne pas confondre un quartier avec une commune, une intercommunalité ou une zone commerciale extérieure.
+- Ne pas inventer de découpage administratif qui n'existe pas.
+- Ne pas considérer automatiquement les zones statistiques IRIS de l'INSEE comme des quartiers officiels.
+- Les IRIS peuvent être utilisés comme supports d'analyse statistique, mais leurs limites ne doivent pas être assimilées à celles d'un quartier sans justification.
+
+Lorsqu'un secteur est connu sous un nom d'usage mais ne constitue pas un quartier officiellement reconnu, tu peux l'intégrer à condition que son existence et sa localisation soient suffisamment établies.
+
+Ne découpe pas artificiellement un quartier en plusieurs micro-secteurs simplement pour augmenter le nombre de résultats.
+
+À l'inverse, ne fusionne pas deux quartiers distincts lorsqu'ils présentent des caractéristiques urbaines ou résidentielles sensiblement différentes.
+
+L'inventaire doit couvrir l'ensemble de la commune, y compris les secteurs périphériques, les zones pavillonnaires et les secteurs moins connus.
+
+Ne fixe aucune limite arbitraire au nombre de quartiers : le nombre doit correspondre à la réalité géographique de la commune.
+
+==================================================
+3. MÉTHODOLOGIE ET FIABILITÉ DES DONNÉES
+==================================================
+
+Pour chaque quartier, applique les principes suivants :
+
+A. Hiérarchie des sources
+
+Privilégier les informations issues de sources fiables et institutionnelles, notamment :
+
+- INSEE : données démographiques et socio-économiques, notamment les données disponibles à l'échelle IRIS.
+- Mairie et documents d'urbanisme : dénomination des quartiers, organisation urbaine et équipements.
+- Ministère de l'Éducation nationale : établissements scolaires et informations officielles disponibles.
+- Île-de-France Mobilités ou opérateurs de transport : lignes, gares, stations et dessertes.
+- Ministère de l'Intérieur et données publiques officielles : statistiques de sécurité lorsqu'elles sont disponibles à une échelle géographique pertinente.
+- Documents publics locaux : projets urbains, équipements et aménagements.
+
+Ne cite jamais une source, une statistique ou une publication dont tu ne peux pas établir l'existence.
+
+B. Respect de l'échelle géographique
+
+Pour chaque information, vérifie qu'elle concerne bien le quartier concerné.
+
+Lorsqu'une donnée provient d'un découpage statistique IRIS :
+
+- Ne pas la présenter comme une donnée exacte du quartier si les périmètres ne correspondent pas.
+- Signaler qu'il s'agit d'une indication à l'échelle IRIS ou d'un périmètre statistique proche.
+- Ne pas extrapoler une moyenne communale à chaque quartier.
+
+Lorsqu'une donnée n'existe qu'à l'échelle de la commune, ne pas la répartir arbitrairement entre les quartiers.
+
+C. Gestion des incertitudes
+
+Si les informations disponibles sont partielles :
+
+- Fournir uniquement les éléments suffisamment fiables.
+- Signaler explicitement les limites de précision.
+- Utiliser "Non disponible" pour les informations qui ne peuvent pas être établies.
+- Ne pas compenser une absence de données par une estimation intuitive.
+
+==================================================
+4. DÉFINITION PRÉCISE DES 7 CHAMPS
+==================================================
+
+Chaque quartier doit être décrit à travers les 7 champs suivants.
+
+1. "Nom"
+
+Indiquer le nom du quartier ou du secteur résidentiel.
+
+Respecter autant que possible la dénomination locale ou officielle.
+
+Ne pas inventer de nom de quartier.
+
+Si le secteur est un quartier d'usage plutôt qu'un quartier administratif officiel, ne pas laisser entendre qu'il dispose d'un statut officiel.
+
+2. "Caractéristiques"
+
+Décrire concrètement l'identité urbaine et résidentielle du quartier.
+
+Préciser, selon les informations disponibles :
+
+- Type d'habitat : maisons individuelles, pavillons, immeubles collectifs, résidences récentes, habitat ancien, etc.
+- Densité et organisation urbaine.
+- Ambiance générale : familiale, animée, résidentielle, calme, commerçante, urbaine, etc.
+- Qualité et nature du cadre de vie.
+- Espaces verts, parcs et espaces naturels.
+- Commerces et services de proximité.
+- Équipements et infrastructures utiles au quotidien.
+- Présence éventuelle de nuisances : circulation, bruit, infrastructures routières ou ferroviaires, etc.
+
+Éviter les descriptions génériques qui pourraient correspondre à n'importe quel quartier.
+
+Distinguer les caractéristiques réellement propres au secteur de celles qui concernent toute la commune.
+
+3. "Catégorie sociale"
+
+Décrire le profil socio-économique dominant du quartier à partir d'informations fiables.
+
+Lorsque les données le permettent, prendre en compte :
+
+- Les catégories socioprofessionnelles représentées.
+- La proportion de cadres et professions intermédiaires.
+- La présence d'employés, d'ouvriers, d'indépendants et de retraités.
+- La mixité sociale.
+- Le profil des ménages et des familles.
+
+Ne pas déduire la catégorie sociale d'un quartier uniquement à partir de son apparence, du type de logement ou du niveau supposé des prix immobiliers.
+
+Ne pas qualifier automatiquement un quartier de "favorisé", "aisé" ou "populaire" sans éléments suffisamment solides.
+
+Les données INSEE peuvent être utilisées lorsqu'elles correspondent à un périmètre statistique pertinent.
+
+En l'absence de données suffisamment fiables à l'échelle du quartier, écrire :
+"Non disponible".
+
+4. "Moyenne d'âge des résidents"
+
+Indiquer l'âge moyen des habitants du quartier, en années, uniquement lorsqu'une donnée suffisamment fiable est disponible.
+
+Exemple de format :
+"38 ans".
+
+Règles impératives :
+
+- Ne pas confondre âge moyen et âge médian.
+- Ne pas reprendre automatiquement l'âge moyen de la commune.
+- Ne pas inventer une moyenne à partir du type de logements ou du profil supposé des habitants.
+- Ne pas présenter une estimation intuitive comme une statistique.
+- Si une donnée statistique est disponible uniquement à l'échelle IRIS, le préciser dans la valeur.
+- Si aucune donnée suffisamment fiable n'est disponible à l'échelle pertinente, écrire "Non disponible".
+
+5. "Sécurité"
+
+Évaluer la sécurité du quartier avec une grande prudence.
+
+Lorsque des données officielles localisées existent, prendre en compte notamment :
+
+- Les faits de délinquance disponibles à une échelle géographique pertinente.
+- Les atteintes aux biens et aux personnes.
+- Les informations publiques locales relatives à la tranquillité publique.
+- Les éventuels éléments objectifs permettant de caractériser le secteur.
+
+Distinguer impérativement :
+
+- Les faits mesurés par des statistiques officielles.
+- Les informations publiques et documentées.
+- Le ressenti ou la réputation du quartier.
+
+Ne pas déduire le niveau de sécurité à partir de la catégorie sociale des habitants, de l'apparence du quartier ou de préjugés.
+
+Ne pas utiliser automatiquement les statistiques de l'ensemble de la commune pour qualifier chaque quartier.
+
+Si seules des données communales sont disponibles, ne pas inventer de différences entre quartiers.
+
+Tu peux utiliser une appréciation qualitative uniquement si elle repose sur des éléments suffisamment fiables.
+
+Si la sécurité ne peut pas être évaluée sérieusement à l'échelle du quartier, écrire :
+"Non disponible à l'échelle du quartier".
+
+6. "Écoles"
+
+Identifier les établissements scolaires situés dans le quartier ou permettant sa desserte.
+
+Prendre en compte, selon les informations disponibles :
+
+- Écoles maternelles.
+- Écoles élémentaires.
+- Établissements regroupant maternelle et élémentaire.
+- Collèges.
+- Lycées.
+
+Privilégier les noms réels des établissements.
+
+Règles impératives :
+
+- Ne pas inventer le nom d'une école.
+- Ne pas confondre un établissement situé dans le quartier avec un établissement simplement proche.
+- Ne pas affirmer qu'une école est l'établissement de rattachement d'un quartier sans disposer d'une information officielle de sectorisation.
+- Ne pas supposer que tous les habitants d'un quartier dépendent de la même école.
+- Ne pas confondre proximité géographique et rattachement scolaire.
+
+Lorsque c'est possible, distinguer dans la valeur :
+"Établissements présents dans le quartier : ... ; établissements à proximité : ... ; sectorisation officielle : ...".
+
+Si les établissements sont identifiés mais que la sectorisation n'est pas connue, le préciser.
+
+Si aucune information fiable n'est disponible, écrire :
+"Non disponible".
+
+7. "Transports"
+
+Décrire précisément l'accessibilité réelle du quartier.
+
+Identifier, lorsque les informations sont disponibles :
+
+- Les gares ferroviaires et stations de métro.
+- Les lignes de RER, Transilien, métro ou tramway.
+- Les lignes de bus et leurs principaux arrêts.
+- Les axes routiers structurants.
+- Les possibilités de déplacement à vélo.
+- L'accessibilité des principaux pôles de transport.
+
+Préciser les noms des lignes et des stations lorsqu'ils sont connus.
+
+Distinguer impérativement :
+
+- Les transports présents directement dans le quartier.
+- Les transports accessibles à proximité.
+- Les transports accessibles uniquement en voiture ou après un trajet complémentaire.
+
+Ne pas inventer de temps de trajet ou de distance.
+
+Ne pas présenter une gare située dans une commune voisine comme étant située dans le quartier.
+
+Privilégier une description concrète de l'accessibilité plutôt que des appréciations vagues comme "bien desservi".
+
+==================================================
+5. NIVEAU DE DÉTAIL ATTENDU
+==================================================
+
+Chaque quartier doit bénéficier d'une description suffisamment détaillée pour permettre une comparaison immobilière et résidentielle.
+
+Les champs "Caractéristiques", "Catégorie sociale", "Sécurité", "Écoles" et "Transports" doivent être rédigés de façon informative et concrète.
+
+Éviter :
+- Les descriptions trop courtes et génériques.
+- Les répétitions identiques entre plusieurs quartiers.
+- Les jugements de valeur non justifiés.
+- Les affirmations commerciales ou promotionnelles.
+- Les formulations exagérément positives ou négatives.
+
+Lorsque deux quartiers sont réellement similaires, expliquer leurs différences plutôt que de produire deux descriptions artificiellement distinctes.
+
+Ne pas inventer de données pour remplir toutes les rubriques.
+
+==================================================
+6. FORMAT DE SORTIE OBLIGATOIRE
+==================================================
+
+Retourner EXCLUSIVEMENT une liste JSON valide.
+
+Chaque objet représente un seul quartier ou secteur résidentiel identifié.
+
+Chaque objet doit contenir EXACTEMENT les 7 clés suivantes, dans cet ordre :
 
 [
   {{
@@ -801,23 +1079,48 @@ La sortie doit être une liste JSON d'objets, chaque objet représentant un quar
   }}
 ]
 
-Définitions :
-- "Nom" : nom du quartier.
-- "Caractéristiques" : type d'habitat, ambiance, commodités principales.
-- "Catégorie sociale" : catégorie socio-professionnelle dominante.
-- "Moyenne d'âge des résidents" : âge moyen estimé des habitants du quartier, en années, et ajouter "ans" à la fin. Ex : "37 ans".
-- "Sécurité" : niveau de sécurité ressenti (ex : Très bonne, Bonne, Correcte, Faible, etc.).
-- "Écoles" : écoles de rattachement (noms ou types, séparés par des virgules).
-- "Transports" : modes de transport disponibles et accessibilité.
+Contraintes de format :
 
-Si une information est inconnue, écris "Non disponible". Assure-toi de couvrir tous les quartiers importants de la ville, y compris les quartiers périphériques.
+- Les 7 clés sont obligatoires.
+- Aucune clé supplémentaire n'est autorisée.
+- Toutes les valeurs doivent être des chaînes de caractères.
+- Respecter strictement l'orthographe des clés et leur ordre.
+- Ne pas retourner d'objet avec une valeur null.
+- Ne pas utiliser de commentaires.
+- Ne pas ajouter de virgule après le dernier élément d'un objet ou d'une liste.
+- Échapper correctement les guillemets présents dans les valeurs.
+- Ne pas inclure de balises Markdown.
+- Ne pas ajouter de texte explicatif avant ou après le JSON.
+- Ne pas ajouter de champ "Sources", "Méthodologie" ou "Commentaires".
 
-Exemple de format attendu (ne pas utiliser ces valeurs) :
-[
-  {{"Nom": "Centre-ville", "Caractéristiques": "Appartements anciens, commerces", "Catégorie sociale": "Mixte", "Moyenne d'âge des résidents": "42 ans", "Sécurité": "Bonne", "Écoles": "Lycée X, Collège Y", "Transports": "Bus, gare"}},
-  {{"Nom": "Quartier Nord", "Caractéristiques": "Pavillonnaire, calme", "Catégorie sociale": "Familles", "Moyenne d'âge des résidents": "36 ans", "Sécurité": "Très bonne", "Écoles": "École primaire Z", "Transports": "Bus"}}
-]
-                """
+Si une information est inconnue, utiliser la valeur "Non disponible" ou, lorsque cela est nécessaire, préciser l'échelle géographique à laquelle elle n'est pas disponible.
+
+==================================================
+7. CONTRÔLE QUALITÉ AVANT RÉPONSE
+==================================================
+
+Avant de produire le JSON, effectuer mentalement les vérifications suivantes :
+
+1. Tous les quartiers et secteurs résidentiels significatifs identifiés ont-ils été intégrés ?
+2. Les quartiers périphériques ont-ils été pris en compte ?
+3. Tous les secteurs appartiennent-ils bien à la commune étudiée ?
+4. Des quartiers ont-ils été inventés ou découpés artificiellement ?
+5. Les informations démographiques et sociales reposent-elles sur des éléments suffisamment fiables ?
+6. Les statistiques communales ont-elles été abusivement attribuées à des quartiers ?
+7. Les données de sécurité sont-elles réellement pertinentes à l'échelle du quartier ?
+8. Les écoles citées existent-elles et leur localisation ou leur rattachement est-il correctement caractérisé ?
+9. Les transports cités desservent-ils réellement le secteur ?
+10. Chaque objet contient-il exactement les 7 clés attendues ?
+11. Toutes les valeurs sont-elles des chaînes de caractères ?
+12. Le résultat constitue-t-il un JSON syntaxiquement valide ?
+
+En cas de doute, privilégier "Non disponible" plutôt qu'une information incertaine.
+
+Génère maintenant l'inventaire des quartiers et secteurs résidentiels de la commune suivante :
+
+{ville_quartiers}
+"""
+
 
                 with st.spinner("Analyse des quartiers en cours..."):
                     reponse = model.generate_content(
