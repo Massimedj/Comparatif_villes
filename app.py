@@ -781,7 +781,7 @@ with tab2:
         else:
             try:
 
-prompt_quartiers = f"""
+                prompt_quartiers = f"""
 Tu es un expert en analyse urbaine, démographie, sociologie territoriale et immobilier résidentiel en France.
 
 Ta mission est de réaliser un inventaire aussi exhaustif et fiable que possible des quartiers, secteurs résidentiels et zones géographiques cohérentes de la commune suivante :
@@ -1116,10 +1116,8 @@ Avant de produire le JSON, effectuer mentalement les vérifications suivantes :
 
 En cas de doute, privilégier "Non disponible" plutôt qu'une information incertaine.
 
-Génère maintenant l'inventaire des quartiers et secteurs résidentiels de la commune suivante :
-
-{ville_quartiers}
-"""
+Génère maintenant l'inventaire des quartiers et secteurs résidentiels de la commune suivante : {ville_quartiers}
+                """
 
 
                 with st.spinner("Analyse des quartiers en cours..."):
