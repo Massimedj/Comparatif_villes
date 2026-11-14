@@ -780,7 +780,6 @@ with tab2:
             st.warning("⚠️ Veuillez entrer un nom de ville.")
         else:
             try:
-
                 prompt_quartiers = f"""
 Tu es un expert en analyse urbaine, démographie, sociologie territoriale et immobilier résidentiel en France.
 
